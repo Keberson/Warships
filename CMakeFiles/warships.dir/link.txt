@@ -1,0 +1,1 @@
+/usr/bin/c++  -g   CMakeFiles/warships.dir/src/game.cpp.o CMakeFiles/warships.dir/src/gamerules.cpp.o CMakeFiles/warships.dir/src/field.cpp.o CMakeFiles/warships.dir/src/user.cpp.o CMakeFiles/warships.dir/src/main.cpp.o  -o warships 
