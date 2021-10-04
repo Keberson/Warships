@@ -94,7 +94,7 @@ void Game::startGame() {
         // TODO(keberson): реализация для случая, если 2 игрока
 
 
-        // TODO(keberson): условие окончание игры, ввод неверный, добавить буквы и цифры сверху и справа соответственно, пошаманаить над отображением
+        // TODO(keberson): условие окончание игры, добавить буквы и цифры сверху и справа соответственно
         std::cout << std::endl << "Now is your turn to attack" << std::endl;
         std::cout << _players[0].getField(1) << std::endl;
         _players[0].turn(_computer.getField(0), _rules.getNumberOfShips());
