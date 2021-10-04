@@ -17,17 +17,19 @@ public:
     virtual int changeCellState(unsigned, unsigned, int) = 0;
     virtual int outputResult() = 0;
     virtual void clearScreen() = 0;
+    virtual std::string getCell() = 0;
     virtual ~IUI() {};
 };
 
 class ConsoleUI: public IUI {
 public:
     ConsoleUI() {};
-    virtual int createScreen(unsigned, unsigned);
-    virtual int createField(unsigned, unsigned);
-    virtual int changeCellState(unsigned, unsigned, int);
-    virtual int outputResult();
-    virtual void clearScreen();
+    int createScreen(unsigned, unsigned);
+    int createField(unsigned, unsigned);
+    int changeCellState(unsigned, unsigned, int);
+    int outputResult();
+    void clearScreen();
+    std::string getCell();
 };
 
 class Game {
@@ -38,8 +40,8 @@ private:
     Computer _computer;
 public:
     Game(std::string filename = "");
+    void prepareToGame();
     void startGame();
-    int turn();
 };
 
 #endif // WARSHIPS_GAME_H

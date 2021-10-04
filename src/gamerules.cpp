@@ -132,6 +132,9 @@ GameRules::GameRules(std::string filename) {
             _ships.push_back(Ship(idCounter++, STANDARD_SHIPS_NAME[shipSwitch], STANDARD_SHIPS_WIDTH[shipSwitch],
                                   STANDARD_SHIPS_HEIGHT[shipSwitch], STANDARD_SHIPS_ATTACK_RADIUS[shipSwitch]));
         }
+
+        // TODO(keberson): переделать вычисление площади при использовании кастомных кораблей
+        _squareOfShips += STANDARD_SHIPS_HEIGHT[shipSwitch]*STANDARD_SHIPS_WIDTH[shipSwitch];
     }
 
     tempVector = parser.getParserItem("rules", "turnTime");
@@ -143,6 +146,7 @@ GameRules::GameRules(std::string filename) {
          tempVector = parser.getParserItem("rules", "isActiveBonuses");
         TODO(keberson): сделать заполнение вектора _bonuses бонусами
     }*/
+    _squareOfShips = 0;
 }
 
 Ship* GameRules::getShip(unsigned id) {

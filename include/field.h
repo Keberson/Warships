@@ -45,13 +45,15 @@ private:
     std::vector<Cell> _cells;
     unsigned _width;
     unsigned _height;
+    unsigned _numberOfHits;
 public:
-    Field() {};
+    Field() { _numberOfHits = 0; };
     Field(unsigned, unsigned);
-    void setID(unsigned x, unsigned y, unsigned id) { _cells[_width*x + y].setID(id); };
+    void setID(unsigned x, unsigned y, unsigned id);
     Cell& getCell(unsigned x, unsigned y) { return _cells[x*_width + y]; };
     unsigned getWidth() { return _width; };
     unsigned getHeight() { return _height; };
+    unsigned getNumberOfHits() { return _numberOfHits; };
     friend std::ostream& operator << (std::ostream& out, Field& field);
 };
 

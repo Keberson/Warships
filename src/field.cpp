@@ -1,4 +1,5 @@
 #include "field.h"
+#include "standards.h"
 
 // Ship
 
@@ -11,6 +12,7 @@
 // Field
 
 Field::Field(unsigned width, unsigned height) {
+    _numberOfHits = 0;
     _width = width;
     _height = height;
     for (int i = 0; i < width; ++i) {
@@ -21,16 +23,21 @@ Field::Field(unsigned width, unsigned height) {
 }
 
 std::ostream& operator << (std::ostream& out, Field& field) {
-    unsigned y = 0;
     for (auto item: field._cells) {
-        if (item.getY() != y) {
-            y = item.getY();
-            out << std::endl;
+        printf("%3d", item.getID());
+        if (item.getY() == (field.getWidth() - 1)) {
+            printf("\n");
         }
-
-        out << item.getID() << ' ';
     }
+
     return out;
+}
+
+void Field::setID(unsigned int x, unsigned int y, unsigned int id) {
+    _cells[x*_width + y].setID(id);
+    if (id >= STANDARD_ID_START + 10) {                     // TODO(keberson): изменить условие, должно быть не + 10
+        _numberOfHits++;
+    }
 }
 
 // /Field

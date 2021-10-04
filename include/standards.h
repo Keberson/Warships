@@ -6,7 +6,7 @@
 #include <string>
 
 const std::string STANDARD_CONFIG_PATH = "configs/game.cg";
-const short STANDARD_ID_START = 30;
+const short STANDARD_ID_START = 20;
 
 // chapter "rules"
 #define STANDARD_FIELD_WIDTH 10

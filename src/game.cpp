@@ -1,19 +1,10 @@
 #include <iostream>
 #include <sstream>
+#include <unistd.h>
 
 #include "game.h"
 
 // ConsoleUI                                                                TODO(danza_): сделать консольный UI
-
-/*class Estream {
-private:
-    string _str;
-public:
-    Estream(string str): str(_str) {};
-
-    friend ostream& operator <<(ostream& out, Estream estr);
-
-};*/
 
 int ConsoleUI::createScreen(unsigned width, unsigned height) {
     return 0;
@@ -61,6 +52,12 @@ void ConsoleUI::clearScreen() {
     std::cout << "\033[2J";
 }
 
+std::string ConsoleUI::getCell() {
+    std::string tempStr;
+    std::cin >> tempStr;
+    return tempStr;
+}
+
 // /ConsoleUI
 
 // Game
@@ -71,13 +68,52 @@ Game::Game(std::string filename) {
     _computer = Computer("Computer", _rules.getWidthField(), _rules.getHeightField());
 }
 
-void Game::startGame() {
+void Game::prepareToGame() {
     _ui.clearScreen();
     // TODO(keberson): создание экранов для нескольких пользователей
     _ui.createScreen(_rules.getWidthField(), _rules.getHeightField());
-    for (int i = 0; i < _rules.getNumberOfShips(); ++i) {           // TODO(keberson): доделать размещение кораблей, не все корабли почему-то помещаются
+    for (int i = _rules.getNumberOfShips() - 1; i >= 0; --i) {
         _players[0].placeShip(STANDARD_ID_START + i, _rules);
     }
-    _players[0].outputField();
 
+    std::cout << "It's your field" << std::endl;
+    std::cout << _players[0].getField(0) << std::endl;
+
+    for (int i = _rules.getNumberOfShips() - 1; i >= 0; --i) {
+        _computer.placeShip(STANDARD_ID_START + i, _rules);
+    }
+
+    sleep(5);
+
+    // TODO(keberson): вывод двух полей в случае, если противники Человек и Компьютер
+}
+
+void Game::startGame() {
+    bool isGameEnd = false;
+    while (!isGameEnd) {
+        // TODO(keberson): реализация для случая, если 2 игрока
+
+
+        // TODO(keberson): условие окончание игры, ввод неверный, добавить буквы и цифры сверху и справа соответственно, пошаманаить над отображением
+        std::cout << std::endl << "Now is your turn to attack" << std::endl;
+        std::cout << _players[0].getField(1) << std::endl;
+        _players[0].turn(_computer.getField(0), _rules.getNumberOfShips());
+        std::cout << std::endl << "Result of your turn" << std::endl;
+        std::cout << _players[0].getField(1) << std::endl;
+        sleep(5);
+        /*if (_players[0].getField(0).getNumberOfHits() == _rules.getSquareOfShips()) {
+            isGameEnd = true;
+        }*/
+
+        std::cout << std::endl << "Computer is attacking" << std::endl;
+        std::cout << _players[0].getField(0) << std::endl;
+        sleep(2);
+
+        _computer.turn(_players[0].getField(0), _rules.getNumberOfShips());
+        std::cout << std::endl << "Computer is attacking" << std::endl;
+        std::cout << _players[0].getField(0) << std::endl;
+        sleep(5);
+    }
+
+    _ui.clearScreen();
 }

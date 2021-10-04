@@ -44,17 +44,19 @@ private:
     bool _isCustomShips;
     unsigned _turnTime;
     bool _isActiveBonuses;
+    unsigned _squareOfShips;
     std::vector<Bonus> _bonuses;
     std::vector<Ship> _ships;
     Parser parser;
 public:
-    GameRules() {};
+    GameRules() { _squareOfShips = 0; };
     GameRules(std::string filename);
     unsigned getWidthField() { return _widthField; };
     unsigned getHeightField() { return _heightField; };
     unsigned getNumberOfShips() { return _numberOfShips; };
     unsigned getTurnTime() { return _turnTime; };
     bool getFlagBonuses() { return _isActiveBonuses; };
+    unsigned getSquareOfShips() { return _squareOfShips; };
     Ship* getShip(unsigned);
 };
 

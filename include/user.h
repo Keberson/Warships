@@ -15,26 +15,30 @@ private:
 public:
     User() {};
     User(std::string, unsigned, unsigned);
-    void changeCellState(unsigned, unsigned, unsigned);
     void placeShip(unsigned, GameRules&);
-    virtual int turn() = 0;
-
-    // тестовый метод
-    void outputField() { std::cout << _field[0] << std::endl; };
+    void attackEnemy(unsigned, unsigned, Field&, unsigned);
+    Field& getField(unsigned number) { return _field[number]; };
+    virtual void turn(Field&, unsigned) = 0;
 };
 
-class Player: virtual public User {
+class Computer;
+
+class Player: public User {
 public:
     Player() : User() {};
     Player(std::string name, unsigned widthField, unsigned heightField) : User(name, widthField, heightField) {};
-    int turn();
+    void turn(Field&, unsigned);
+
+    friend class Computer;
 };
 
-class Computer: virtual public User {
+class Computer: public User {
 public:
     Computer() : User() {};
     Computer(std::string name, unsigned widthField, unsigned heightField) : User(name, widthField, heightField) {};
-    int turn();
+    void turn(Field&, unsigned);
+
+    friend class Player;
 };
 
 #endif //WARSHIPS_USER_H
