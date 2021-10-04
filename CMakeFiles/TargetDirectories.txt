@@ -1,3 +1,0 @@
-/mnt/d/Рабочий стол/projects/warships/CMakeFiles/rebuild_cache.dir
-/mnt/d/Рабочий стол/projects/warships/CMakeFiles/edit_cache.dir
-/mnt/d/Рабочий стол/projects/warships/CMakeFiles/warships.dir
