@@ -146,7 +146,6 @@ GameRules::GameRules(std::string filename) {
          tempVector = parser.getParserItem("rules", "isActiveBonuses");
         TODO(keberson): сделать заполнение вектора _bonuses бонусами
     }*/
-    _squareOfShips = 0;
 }
 
 Ship* GameRules::getShip(unsigned id) {

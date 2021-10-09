@@ -16,9 +16,10 @@ public:
     User() {};
     User(std::string, unsigned, unsigned);
     void placeShip(unsigned, GameRules&);
-    void attackEnemy(unsigned, unsigned, Field&, unsigned);
+    bool attackEnemy(unsigned, unsigned, Field&, unsigned);
     Field& getField(unsigned number) { return _field[number]; };
-    virtual void turn(Field&, unsigned) = 0;
+    virtual bool turn(Field&, unsigned) = 0;
+    ~User() {};
 };
 
 class Computer;
@@ -27,7 +28,7 @@ class Player: public User {
 public:
     Player() : User() {};
     Player(std::string name, unsigned widthField, unsigned heightField) : User(name, widthField, heightField) {};
-    void turn(Field&, unsigned);
+    bool turn(Field&, unsigned);
 
     friend class Computer;
 };
@@ -36,7 +37,7 @@ class Computer: public User {
 public:
     Computer() : User() {};
     Computer(std::string name, unsigned widthField, unsigned heightField) : User(name, widthField, heightField) {};
-    void turn(Field&, unsigned);
+    bool turn(Field&, unsigned);
 
     friend class Player;
 };

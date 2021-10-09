@@ -23,13 +23,27 @@ Field::Field(unsigned width, unsigned height) {
 }
 
 std::ostream& operator << (std::ostream& out, Field& field) {
-    for (auto item: field._cells) {
-        printf("%3d", item.getID());
-        if (item.getY() == (field.getWidth() - 1)) {
-            printf("\n");
-        }
+    out.width(3);
+    out << ' ';
+    for (int i = 0; i < field.getWidth(); ++i) {                // TODO(keberson): предусмотреть случай, когда ширина больше, чем 26
+        out.width(3);
+        out << (char)('a' + i);
     }
 
+    unsigned counter = 0;
+    for (auto item: field._cells) {
+        if (item.getY() % field.getWidth() == 0) {
+            out << std::endl;
+            counter++;
+            out.width(3);
+            out << counter;
+        }
+
+        out.width(3);
+        out << item.getID();
+    }
+
+    out << std::endl;
     return out;
 }
 

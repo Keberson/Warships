@@ -93,26 +93,36 @@ void Game::startGame() {
     while (!isGameEnd) {
         // TODO(keberson): реализация для случая, если 2 игрока
 
-
-        // TODO(keberson): условие окончание игры, добавить буквы и цифры сверху и справа соответственно
         std::cout << std::endl << "Now is your turn to attack" << std::endl;
         std::cout << _players[0].getField(1) << std::endl;
-        _players[0].turn(_computer.getField(0), _rules.getNumberOfShips());
+        while (_players[0].turn(_computer.getField(0), _rules.getNumberOfShips())) {
+            std::cout << std::endl << "Your turn to attack again" << std::endl;
+            std::cout << _players[0].getField(1) << std::endl;
+        }
+
         std::cout << std::endl << "Result of your turn" << std::endl;
         std::cout << _players[0].getField(1) << std::endl;
         sleep(5);
-        /*if (_players[0].getField(0).getNumberOfHits() == _rules.getSquareOfShips()) {
+        if (_computer.getField(0).getNumberOfHits() == _rules.getSquareOfShips()) {
             isGameEnd = true;
-        }*/
+        }
 
         std::cout << std::endl << "Computer is attacking" << std::endl;
         std::cout << _players[0].getField(0) << std::endl;
         sleep(2);
 
-        _computer.turn(_players[0].getField(0), _rules.getNumberOfShips());
-        std::cout << std::endl << "Computer is attacking" << std::endl;
+        while (_computer.turn(_players[0].getField(0), _rules.getNumberOfShips())) {
+            std::cout << std::endl << "Computer is attacking again" << std::endl;
+            std::cout << _players[0].getField(0) << std::endl;
+            sleep(2);
+        }
+
+        std::cout << std::endl << "Computer attacked" << std::endl;
         std::cout << _players[0].getField(0) << std::endl;
         sleep(5);
+        if (_players[0].getField(0).getNumberOfHits() == _rules.getSquareOfShips()) {
+            isGameEnd = true;
+        }
     }
 
     _ui.clearScreen();

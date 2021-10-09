@@ -49,7 +49,7 @@ private:
     std::vector<Ship> _ships;
     Parser parser;
 public:
-    GameRules() { _squareOfShips = 0; };
+    GameRules() {};
     GameRules(std::string filename);
     unsigned getWidthField() { return _widthField; };
     unsigned getHeightField() { return _heightField; };
