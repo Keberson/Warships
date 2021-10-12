@@ -14,7 +14,7 @@ Game::Game(std::string filename) {
 void Game::prepareToGame() {
     _ui.clearScreen();
     // TODO(keberson): создание экранов для нескольких пользователей
-    _ui.createScreen(_rules.getWidthField(), _rules.getHeightField());
+    _ui.displayFields(_rules.getWidthField(), _rules.getHeightField());
     for (int i = _rules.getNumberOfShips() - 1; i >= 0; --i) {
         _players[0].placeShip(STANDARD_ID_START + i, _rules);
     }

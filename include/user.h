@@ -12,11 +12,11 @@ private:
     std::vector<Field> _field;
 public:
     User() {};
-    User(std::string, unsigned, unsigned);
-    void placeShip(unsigned, GameRules&);
-    bool attackEnemy(unsigned, unsigned, Field&, unsigned);
-    Field& getField(unsigned number) { return _field[number]; };
-    virtual bool turn(Field&, unsigned) = 0;
+    User(std::string name, size_t widthField, size_t heightField);
+    void placeShip(size_t id , GameRules& rules);
+    bool attackEnemy(size_t x, size_t y, Field& enemyField, size_t offset);
+    Field& getField(size_t number) { return _field[number]; };
+    virtual bool turn(Field&, size_t) = 0;
     ~User() {};
 };
 
@@ -25,8 +25,8 @@ class Computer;
 class Player: public User {
 public:
     Player() : User() {};
-    Player(std::string name, unsigned widthField, unsigned heightField) : User(name, widthField, heightField) {};
-    bool turn(Field&, unsigned);
+    Player(std::string name, size_t widthField, size_t heightField) : User(name, widthField, heightField) {};
+    bool turn(Field& enemyField, size_t numberOfShips);
 
     friend class Computer;
 };
@@ -34,8 +34,8 @@ public:
 class Computer: public User {
 public:
     Computer() : User() {};
-    Computer(std::string name, unsigned widthField, unsigned heightField) : User(name, widthField, heightField) {};
-    bool turn(Field&, unsigned);
+    Computer(std::string name, size_t widthField, size_t heightField) : User(name, widthField, heightField) {};
+    bool turn(Field& enemyField, size_t numberOfShips);
 
     friend class Player;
 };

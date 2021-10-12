@@ -15,7 +15,7 @@ public:
     Parser() {};
     Parser(std::string filename) : _filename(filename) {};
     void parse();
-    std::vector<std::string> getParserItem(std::string, std::string);
+    std::vector<std::string> getParserItem(std::string chapter, std::string key);
     friend std::ostream& operator << (std::ostream& out, Parser& parser);
 };
 

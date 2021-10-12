@@ -4,7 +4,11 @@
 
 // TODO(danza_): сделать консольный UI
 
-int ConsoleUI::displayTheField(unsigned width, unsigned height) {
+size_t ConsoleUI::displayFields(size_t width, size_t height) {
+    return 0;
+}
+
+size_t ConsoleUI::displayTheField(size_t width, size_t height) {
     /*
     unsigned thickness = 2;     //
     unsigned rowWidth = thickness * 10 + thickness * 12;
@@ -32,6 +36,14 @@ int ConsoleUI::displayTheField(unsigned width, unsigned height) {
     ss << "\033[" << i << ";0H\033[40m ";
     std::cout << ss.str();*/
     return 1;
+}
+
+size_t ConsoleUI::changeCellState(size_t x, size_t y, size_t id) {
+    return 0;
+}
+
+size_t ConsoleUI::outputResult() {
+    return 0;
 }
 
 void ConsoleUI::clearScreen() {

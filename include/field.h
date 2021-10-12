@@ -9,33 +9,33 @@
 
 class Cell {
 private:
-    unsigned _x;
-    unsigned _y;
-    unsigned _id;
+    size_t _x;
+    size_t _y;
+    size_t _id;
 public:
     Cell() {};
-    Cell(unsigned x, unsigned y): _x(x), _y(y) {};
-    Cell(unsigned x, unsigned y, unsigned id): _x(x), _y(y), _id(id) {};
-    unsigned getX() { return _x; };
-    unsigned getY() { return _y; };
-    unsigned getID() { return _id; };
-    void setID(unsigned id) { _id = id; };
+    Cell(size_t x, size_t y): _x(x), _y(y) {};
+    Cell(size_t x, size_t y, size_t id): _x(x), _y(y), _id(id) {};
+    size_t getX() { return _x; };
+    size_t getY() { return _y; };
+    size_t getID() { return _id; };
+    void setID(size_t id) { _id = id; };
 };
 
 class Field {
 private:
     std::vector<Cell> _cells;
-    unsigned _width;
-    unsigned _height;
-    unsigned _numberOfHits;
+    size_t _width;
+    size_t _height;
+    size_t _numberOfHits;
 public:
     Field() { _numberOfHits = 0; };
-    Field(unsigned, unsigned);
-    void setID(unsigned x, unsigned y, unsigned id);
-    Cell& getCell(unsigned x, unsigned y) { return _cells[x*_width + y]; };
-    unsigned getWidth() { return _width; };
-    unsigned getHeight() { return _height; };
-    unsigned getNumberOfHits() { return _numberOfHits; };
+    Field(size_t, size_t);
+    void setID(size_t x, size_t y, size_t id);
+    Cell& getCell(size_t x, size_t y) { return _cells[x*_width + y]; };
+    size_t getWidth() { return _width; };
+    size_t getHeight() { return _height; };
+    size_t getNumberOfHits() { return _numberOfHits; };
     friend std::ostream& operator << (std::ostream& out, Field& field);
 };
 

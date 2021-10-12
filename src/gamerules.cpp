@@ -13,10 +13,10 @@ GameRules::GameRules(std::string filename) {
     tempVector = parser.getParserItem("rules", "typeOfShips");
     _isCustomShips = (tempVector.empty() || tempVector[0] != "inactive" || tempVector[0] != "active") ?
                         STANDARD_CUSTOM_SHIPS : (tempVector[0] == "custom");
-    int idCounter = STANDARD_ID_START;
-    unsigned j = 0;
-    unsigned shipSwitch = 0;
-    for (unsigned i = 0; i < _numberOfShips; ++i, ++j) {
+    size_t idCounter = STANDARD_ID_START;
+    size_t j = 0;
+    size_t shipSwitch = 0;
+    for (size_t i = 0; i < _numberOfShips; ++i, ++j) {
         if (_isCustomShips) {
             // TODO(keberson): заполнение кастомными кораблями
         } else {
@@ -45,9 +45,10 @@ GameRules::GameRules(std::string filename) {
     }*/
 }
 
-Ship* GameRules::getShip(unsigned id) {
-    for (int i = 0; i < _numberOfShips; ++i) {
-        if (_ships[i].getId() == id) {
+Ship* GameRules::getShip(size_t id) {
+    for (size_t i = 0; i < _numberOfShips; ++i) {
+        size_t temp = _ships[i].getId();
+        if (_ships[i].getId() == id) {                    // TODO(keberson): поменять условие
             return &_ships[i];
         }
     }

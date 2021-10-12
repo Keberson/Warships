@@ -4,13 +4,13 @@
 #include "standards.h"
 #include "user.h"
 
-User::User(std::string name, unsigned widthField, unsigned heightField) {
+User::User(std::string name, size_t widthField, size_t heightField) {
     _name = name;
     std::vector<Field> tempVector = { Field(widthField, heightField), Field(widthField, heightField) };
     _field = tempVector;
 }
 
-void User::placeShip(unsigned id , GameRules& rules) {
+void User::placeShip(size_t id , GameRules& rules) {
     // TODO(keberson): установка кораблей на игровое поле либо рандом, либо считывая с консоли (сделать)
     Ship* currentShip = rules.getShip(id);
     int randomX;
@@ -22,8 +22,8 @@ void User::placeShip(unsigned id , GameRules& rules) {
         randomY = rand() % rules.getHeightField();
         isInvertAxises = rand() % 2 == 1;
         if (_field[0].getCell(randomX, randomY).getID() == 0) {
-            if ((randomX + (currentShip->getLength() - 1) <= rules.getWidthField() - 1) &&
-                (randomY + (currentShip->getWidth() - 1) <= rules.getHeightField() - 1)) {
+            if ((randomX + ((int)currentShip->getLength() - 1) <= rules.getWidthField() - 1) &&
+                (randomY + ((int)currentShip->getWidth() - 1) <= rules.getHeightField() - 1)) {
                 bool isFindCells = true;
                 for (int i = -1; i <= (int)currentShip->getWidth(); ++i) {
                     for (int j = -1; j <= (int)currentShip->getLength(); ++j) {
@@ -72,8 +72,8 @@ void User::placeShip(unsigned id , GameRules& rules) {
     }
 }
 
-bool User::attackEnemy(unsigned x, unsigned y, Field& enemyField, unsigned offset) {
-    unsigned id = enemyField.getCell(x, y).getID();
+bool User::attackEnemy(size_t x, size_t y, Field& enemyField, size_t offset) {
+    size_t id = enemyField.getCell(x, y).getID();
     if (id == 0) {
         enemyField.setID(x, y, 1);
         _field[1].setID(x, y, 1);
@@ -86,9 +86,9 @@ bool User::attackEnemy(unsigned x, unsigned y, Field& enemyField, unsigned offse
 }
 
 
-bool Player::turn(Field& enemyField, unsigned numberOfShips) {
-    unsigned x;
-    unsigned y;
+bool Player::turn(Field& enemyField, size_t numberOfShips) {
+    size_t x;
+    size_t y;
     std::string cell;
     std::cout << "Input attacking cell: ";
     std::cin >> cell;
@@ -115,9 +115,9 @@ bool Player::turn(Field& enemyField, unsigned numberOfShips) {
 }
 
 
-bool Computer::turn(Field& enemyField, unsigned numberOfShips) {
-    unsigned randomX;
-    unsigned randomY;
+bool Computer::turn(Field& enemyField, size_t numberOfShips) {
+    size_t randomX;
+    size_t randomY;
     bool isCorrectCell = false;
     while (!isCorrectCell) {
         randomX = rand() % 10;
@@ -127,6 +127,6 @@ bool Computer::turn(Field& enemyField, unsigned numberOfShips) {
         }
     }
 
-    unsigned offset = numberOfShips + numberOfShips % 10;
+    size_t offset = numberOfShips + numberOfShips % 10;
     return attackEnemy(randomX, randomY, enemyField, offset);
 }

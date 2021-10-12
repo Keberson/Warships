@@ -5,10 +5,10 @@
 
 class IUI {
 public:
-    virtual int displayFields(unsigned, unsigned) = 0;
-    virtual int displayTheField(unsigned, unsigned) = 0;
-    virtual int changeCellState(unsigned, unsigned, int) = 0;
-    virtual int outputResult() = 0;
+    virtual size_t displayFields(size_t width, size_t height) = 0;
+    virtual size_t displayTheField(size_t width, size_t height) = 0;
+    virtual size_t changeCellState(size_t x, size_t y, size_t id) = 0;
+    virtual size_t outputResult() = 0;
     virtual void clearScreen() = 0;
     virtual std::string getCell() = 0;
     virtual ~IUI() {};
@@ -17,10 +17,10 @@ public:
 class ConsoleUI: public IUI {
 public:
     ConsoleUI() {};
-    int displayFields(unsigned, unsigned);
-    int displayTheField(unsigned, unsigned);
-    int changeCellState(unsigned, unsigned, int);
-    int outputResult();
+    size_t displayFields(size_t width, size_t height);
+    size_t displayTheField(size_t width, size_t height);
+    size_t changeCellState(size_t x, size_t y, size_t id);
+    size_t outputResult();
     void clearScreen();
     std::string getCell();
 };
