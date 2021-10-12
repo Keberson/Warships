@@ -5,8 +5,8 @@
 
 class IUI {
 public:
-    virtual int createScreen(unsigned, unsigned) = 0;
-    virtual int createField(unsigned, unsigned) = 0;
+    virtual int displayFields(unsigned, unsigned) = 0;
+    virtual int displayTheField(unsigned, unsigned) = 0;
     virtual int changeCellState(unsigned, unsigned, int) = 0;
     virtual int outputResult() = 0;
     virtual void clearScreen() = 0;
@@ -17,8 +17,8 @@ public:
 class ConsoleUI: public IUI {
 public:
     ConsoleUI() {};
-    int createScreen(unsigned, unsigned);
-    int createField(unsigned, unsigned);
+    int displayFields(unsigned, unsigned);
+    int displayTheField(unsigned, unsigned);
     int changeCellState(unsigned, unsigned, int);
     int outputResult();
     void clearScreen();

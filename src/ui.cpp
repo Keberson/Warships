@@ -4,19 +4,7 @@
 
 // TODO(danza_): сделать консольный UI
 
-int ConsoleUI::createScreen(unsigned width, unsigned height) {
-    return 0;
-}
-
-int ConsoleUI::changeCellState(unsigned x, unsigned y, int state) {
-    return 0;
-}
-
-int ConsoleUI::outputResult() {
-    return 0;
-}
-
-int ConsoleUI::createField(unsigned width, unsigned height) {
+int ConsoleUI::displayTheField(unsigned width, unsigned height) {
     /*
     unsigned thickness = 2;     //
     unsigned rowWidth = thickness * 10 + thickness * 12;
