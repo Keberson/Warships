@@ -4,7 +4,6 @@
 #include "standards.h"
 #include "user.h"
 
-// User
 User::User(std::string name, unsigned widthField, unsigned heightField) {
     _name = name;
     std::vector<Field> tempVector = { Field(widthField, heightField), Field(widthField, heightField) };
@@ -12,7 +11,7 @@ User::User(std::string name, unsigned widthField, unsigned heightField) {
 }
 
 void User::placeShip(unsigned id , GameRules& rules) {
-    // TODO(keberson): установка кораблей на игровое поле либо рандом, либо считывая с консоли
+    // TODO(keberson): установка кораблей на игровое поле либо рандом, либо считывая с консоли (сделать)
     Ship* currentShip = rules.getShip(id);
     int randomX;
     int randomY;
@@ -86,9 +85,6 @@ bool User::attackEnemy(unsigned x, unsigned y, Field& enemyField, unsigned offse
     }
 }
 
-// /User
-
-// Player
 
 bool Player::turn(Field& enemyField, unsigned numberOfShips) {
     unsigned x;
@@ -118,9 +114,6 @@ bool Player::turn(Field& enemyField, unsigned numberOfShips) {
     return attackEnemy(x, y, enemyField, numberOfShips);
 }
 
-// /Player
-
-// Computer
 
 bool Computer::turn(Field& enemyField, unsigned numberOfShips) {
     unsigned randomX;
@@ -137,5 +130,3 @@ bool Computer::turn(Field& enemyField, unsigned numberOfShips) {
     unsigned offset = numberOfShips + numberOfShips % 10;
     return attackEnemy(randomX, randomY, enemyField, offset);
 }
-
-// /Computer

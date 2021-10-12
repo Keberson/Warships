@@ -1,5 +1,3 @@
-// WARSHIPS_USER_H
-
 #ifndef WARSHIPS_USER_H
 #define WARSHIPS_USER_H
 
@@ -42,4 +40,4 @@ public:
     friend class Player;
 };
 
-#endif //WARSHIPS_USER_H
+#endif // WARSHIPS_USER_H

@@ -1,40 +1,13 @@
-// WARSHIPS_GAMERULES_H
-
 #ifndef WARSHIPS_GAMERULES_H
 #define WARSHIPS_GAMERULES_H
 
 #include <string>
 #include <vector>
 
+#include "bonus.h"
 #include "field.h"
+#include "parser.h"
 #include "standards.h"
-
-class Bonus {
-private:
-    std::string _name;
-    std::string _type;
-    int _action;
-public:
-    Bonus(std::string name = "", std::string type = "", int action = 0): _name(name), _type(type), _action(action) {};
-    std::string getName() { return _name; };
-    std::string getType() { return _type; };
-    int getAction() { return _action; };
-};
-
-class Parser {
-private:
-    std::string _filename;
-    std::vector<std::pair<std::string, std::string>> _rules;
-    std::vector<std::pair<std::string, std::string>> _ships;
-    std::vector<std::pair<std::string, std::string>> _bonuses;
-    std::vector<std::pair<std::string, std::string>>* getParserPointer(std::string);
-public:
-    Parser() {};
-    Parser(std::string filename) : _filename(filename) {};
-    void parse();
-    std::vector<std::string> getParserItem(std::string, std::string);
-    friend std::ostream& operator << (std::ostream& out, Parser& parser);
-};
 
 class GameRules {
 private:
@@ -62,5 +35,3 @@ public:
 
 
 #endif // WARSHIPS_GAMERULES_H
-
-

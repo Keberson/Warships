@@ -1,5 +1,3 @@
-// WARSHIPS_FIELD_H
-
 #ifndef WARSHIPS_FIELD_H
 #define WARSHIPS_FIELD_H
 
@@ -7,23 +5,7 @@
 #include <string>
 #include <vector>
 
-class Ship {
-private:
-    unsigned _id;
-    std::string _name;
-    unsigned _width;
-    unsigned _length;
-    unsigned _attackRadius;
-public:
-    Ship() {};
-    Ship(int id, std::string name, unsigned width, unsigned length, unsigned attackRadius) :
-            _id(id), _name(name), _width(width), _length(length), _attackRadius(attackRadius) {};
-    int getId() const { return _id; };
-    std::string getName() { return _name; };
-    unsigned getWidth() const { return _width; };
-    unsigned getLength() const { return _length; };
-    unsigned getAttackRadius() const { return _attackRadius; };
-};
+#include "ship.h"
 
 class Cell {
 private:

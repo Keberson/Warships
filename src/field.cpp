@@ -1,15 +1,6 @@
 #include "field.h"
+#include "ship.h"
 #include "standards.h"
-
-// Ship
-
-// /Ship
-
-// Cell
-
-// /Cell
-
-// Field
 
 Field::Field(unsigned width, unsigned height) {
     _numberOfHits = 0;
