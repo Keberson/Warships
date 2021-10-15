@@ -3,8 +3,6 @@
 
 #include "ui.h"
 
-// TODO(danza_): сделать консольный UI
-
 void ConsoleUI::displayFields(Field& leftField, Field& rightField) {
     unsigned offset = 40;
     //unsigned y = leftField.getHeight()*2 + 2;

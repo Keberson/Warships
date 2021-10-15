@@ -1,7 +1,5 @@
 #include <ctime>
 
-#include <unistd.h>
-
 #include "gamerules.h"
 #include "standards.h"
 #include "user.h"
