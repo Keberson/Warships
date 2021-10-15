@@ -57,7 +57,7 @@ void Parser::parse() {
         }
     } else {
         cgfile.close();
-        throw "Parser: can't open file";
+        exit(-2);
     }
 
     cgfile.close();

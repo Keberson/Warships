@@ -1,5 +1,7 @@
 #include <ctime>
 
+#include <unistd.h>
+
 #include "gamerules.h"
 #include "standards.h"
 #include "user.h"
@@ -32,15 +34,8 @@ void User::placeShip(unsigned id , GameRules& rules) {
             if ((randomX + currentLength <= rules.getWidthField() - 1) &&
                 (randomY + currentWidth <= rules.getHeightField() - 1)) {
                 bool isFindCells = true;
-                for (int i = -1; i <= currentWidth; ++i) {
-                    for (int j = -1; j <= currentLength; ++j) {
-                        int offsetX = j;
-                        int offsetY = i;
-                        /*if (isRotateAxises) {
-                            offsetX = i;
-                            offsetY = j;
-                        }*/
-
+                for (int offsetY = -1; offsetY <= currentWidth; ++offsetY) {
+                    for (int offsetX = -1; offsetX <= currentLength; ++offsetX) {
                         if (randomX + offsetX > rules.getWidthField() - 1 || randomX + offsetX < 0 ||
                             randomY + offsetY > rules.getHeightField() - 1 || randomY + offsetY < 0) {
                             continue;
@@ -65,15 +60,8 @@ void User::placeShip(unsigned id , GameRules& rules) {
 
     }
 
-    for (int i = 0; i < currentWidth; ++i) {
-        for (int j = 0; j < currentLength; ++j) {
-            int offsetX = j;
-            int offsetY = i;
-            /*if (isRotateAxises) {
-                offsetX = i;
-                offsetY = j;
-            }*/
-
+    for (unsigned offsetY = 0; offsetY < currentWidth; ++offsetY) {
+        for (unsigned offsetX = 0; offsetX < currentLength; ++offsetX) {
             _field[0].setID(randomX + offsetX, randomY + offsetY, id);
         }
     }
@@ -99,8 +87,13 @@ bool Player::turn(Field& enemyField, unsigned numberOfShips) {
     unsigned x;
     unsigned y;
     std::string cell;
-    std::cout << "Input attacking cell: ";
-    std::cin >> cell;
+    std::cout << "\033[2K" << "Input attacking cell: ";
+    std::cin >> cell;                           // TODO(danza): изменить систему ввода данных
+    if (std::cin.eof()) {
+        std::cout << "\033[?25h" << std::endl;
+        exit(2);
+    }
+
     while (true) {
         if (cell.length() >= 3) {
             if (cell[0] >= 'a' && cell[0] <= 'j' && cell.substr(1) == "10") {
@@ -120,11 +113,56 @@ bool Player::turn(Field& enemyField, unsigned numberOfShips) {
             }
         }
 
+        std::cout << "\033A" << "\033[2K";
         std::cout << "Reinput attacking cell: ";
         std::cin >> cell;
+        if (std::cin.eof()) {
+            std::cout << "\033[?25h" << std::endl;
+            exit(2);
+        }
     }
 
-    return attackEnemy(x, y, enemyField, numberOfShips);
+    std::cout << "\033A" << "\033[2K";
+
+    if (attackEnemy(x, y, enemyField, numberOfShips)) {
+        bool isHaveShip = false;
+        if (x + 1 < enemyField.getWidth()) {
+            if (enemyField.getCell(x + 1, y).getID() / 10 == 2) {
+                std::cout << "Hit!" << std::endl;
+                isHaveShip = true;
+            }
+        }
+
+        if (!isHaveShip && (x - 1 < enemyField.getWidth())) {
+            if (enemyField.getCell(x - 1, y).getID() / 10 == 2) {
+                std::cout << "Hit!" << std::endl;
+                isHaveShip = true;
+            }
+        }
+
+        if (!isHaveShip && (y + 1 < enemyField.getWidth())) {
+            if (enemyField.getCell(x, y + 1).getID() / 10 == 2) {
+                std::cout << "Hit!" << std::endl;
+                isHaveShip = true;
+            }
+        }
+        if (!isHaveShip && (y -1 < enemyField.getWidth())) {
+            if (enemyField.getCell(x, y - 1).getID() / 10 == 2) {
+                std::cout << "Hit!" << std::endl;
+                isHaveShip = true;
+            }
+        }
+
+        if (!isHaveShip) {
+            // TODO(danza_): обводка всех полей вокруг корабля
+            std::cout << "Destroyed!" << std::endl;
+        }
+
+        return true;
+    } else {
+        std::cout << "Miss..." << std::endl;
+        return false;
+    }
 }
 
 
