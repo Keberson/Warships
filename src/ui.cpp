@@ -1,4 +1,5 @@
 #include <iostream>
+#include <sys/ioctl.h>
 
 #include "ui.h"
 
