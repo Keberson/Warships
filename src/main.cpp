@@ -1,9 +1,10 @@
-#include <iostream>
+#include <cstdlib>
+#include <ctime>
 
 #include "game.h"
 
 int main(int argc, char* argv[]) {
-    srand(time( nullptr ));
+    srand(time(nullptr));
     Game game("configs/game.cg");
     game.prepareToGame();
     game.startGame();

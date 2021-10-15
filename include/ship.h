@@ -3,20 +3,20 @@
 
 class Ship {
 private:
-    size_t _id;
+    unsigned _id;
     std::string _name;
-    size_t _width;
-    size_t _length;
-    size_t _attackRadius;
+    unsigned _width;
+    unsigned _length;
+    unsigned _attackRadius;
 public:
     Ship() {};
-    Ship(size_t id, std::string name, size_t width, size_t length, size_t attackRadius) :
+    Ship(unsigned id, std::string name, unsigned width, unsigned length, unsigned attackRadius) :
             _id(id), _name(name), _width(width), _length(length), _attackRadius(attackRadius) {};
-    size_t getId() { return _id; };
+    unsigned getId() { return _id; };
     std::string getName() { return _name; };
-    size_t getWidth() { return _width; };
-    size_t getLength() { return _length; };
-    size_t getAttackRadius() { return _attackRadius; };
+    unsigned getWidth() { return _width; };
+    unsigned getLength() { return _length; };
+    unsigned getAttackRadius() { return _attackRadius; };
 };
 
 #endif // WARSHIPS_SHIP_H

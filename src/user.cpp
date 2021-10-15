@@ -4,35 +4,42 @@
 #include "standards.h"
 #include "user.h"
 
-User::User(std::string name, size_t widthField, size_t heightField) {
+User::User(std::string name, unsigned widthField, unsigned heightField) {
     _name = name;
     std::vector<Field> tempVector = { Field(widthField, heightField), Field(widthField, heightField) };
     _field = tempVector;
 }
 
-void User::placeShip(size_t id , GameRules& rules) {
+void User::placeShip(unsigned id , GameRules& rules) {
     // TODO(keberson): установка кораблей на игровое поле либо рандом, либо считывая с консоли (сделать)
     Ship* currentShip = rules.getShip(id);
     int randomX;
     int randomY;
-    bool isInvertAxises;
+    int currentWidth = currentShip->getWidth();
+    int currentLength = currentShip->getLength();
+    bool isRotateAxises;
     bool isCorrectCell = false;
     while (!isCorrectCell) {
         randomX = rand() % rules.getWidthField();
         randomY = rand() % rules.getHeightField();
-        isInvertAxises = rand() % 2 == 1;
+        isRotateAxises = rand() % 2 == 1;
+        if (isRotateAxises) {
+            currentWidth = currentShip->getLength();
+            currentLength = currentShip->getWidth();
+        }
+
         if (_field[0].getCell(randomX, randomY).getID() == 0) {
-            if ((randomX + ((int)currentShip->getLength() - 1) <= rules.getWidthField() - 1) &&
-                (randomY + ((int)currentShip->getWidth() - 1) <= rules.getHeightField() - 1)) {
+            if ((randomX + currentLength <= rules.getWidthField() - 1) &&
+                (randomY + currentWidth <= rules.getHeightField() - 1)) {
                 bool isFindCells = true;
-                for (int i = -1; i <= (int)currentShip->getWidth(); ++i) {
-                    for (int j = -1; j <= (int)currentShip->getLength(); ++j) {
+                for (int i = -1; i <= currentWidth; ++i) {
+                    for (int j = -1; j <= currentLength; ++j) {
                         int offsetX = j;
                         int offsetY = i;
-                        if (isInvertAxises) {
+                        /*if (isRotateAxises) {
                             offsetX = i;
                             offsetY = j;
-                        }
+                        }*/
 
                         if (randomX + offsetX > rules.getWidthField() - 1 || randomX + offsetX < 0 ||
                             randomY + offsetY > rules.getHeightField() - 1 || randomY + offsetY < 0) {
@@ -58,37 +65,39 @@ void User::placeShip(size_t id , GameRules& rules) {
 
     }
 
-    for (int i = 0; i < currentShip->getWidth(); ++i) {
-        for (int j = 0; j < currentShip->getLength(); ++j) {
+    for (int i = 0; i < currentWidth; ++i) {
+        for (int j = 0; j < currentLength; ++j) {
             int offsetX = j;
             int offsetY = i;
-            if (isInvertAxises) {
+            /*if (isRotateAxises) {
                 offsetX = i;
                 offsetY = j;
-            }
+            }*/
 
             _field[0].setID(randomX + offsetX, randomY + offsetY, id);
         }
     }
 }
 
-bool User::attackEnemy(size_t x, size_t y, Field& enemyField, size_t offset) {
-    size_t id = enemyField.getCell(x, y).getID();
+bool User::attackEnemy(unsigned x, unsigned y, Field& enemyField, unsigned offset) {
+    unsigned id = enemyField.getCell(x, y).getID();
     if (id == 0) {
         enemyField.setID(x, y, 1);
         _field[1].setID(x, y, 1);
         return false;
-    } else {
+    } else if (id / 10 == 2) {
         enemyField.setID(x, y, id + offset);
         _field[1].setID(x, y, id + offset);
         return true;
+    } else {
+        return false;
     }
 }
 
 
-bool Player::turn(Field& enemyField, size_t numberOfShips) {
-    size_t x;
-    size_t y;
+bool Player::turn(Field& enemyField, unsigned numberOfShips) {
+    unsigned x;
+    unsigned y;
     std::string cell;
     std::cout << "Input attacking cell: ";
     std::cin >> cell;
@@ -97,13 +106,17 @@ bool Player::turn(Field& enemyField, size_t numberOfShips) {
             if (cell[0] >= 'a' && cell[0] <= 'j' && cell.substr(1) == "10") {
                 y = cell[0] - 'a';
                 x = 9;
-                break;
+                if (enemyField.getCell(x, y).getID() == 0 || enemyField.getCell(x, y).getID() / 10 == 2) {
+                    break;
+                }
             }
         } else {
             if (cell[0] >= 'a' && cell[0] <= 'j' && cell[1] >= '1' && cell[1] <= '9') {
                 y = cell[0] - 'a';
                 x = cell[1] - '1';
-                break;
+                if (enemyField.getCell(x, y).getID() == 0 || enemyField.getCell(x, y).getID() / 10 == 2) {
+                    break;
+                }
             }
         }
 
@@ -115,18 +128,18 @@ bool Player::turn(Field& enemyField, size_t numberOfShips) {
 }
 
 
-bool Computer::turn(Field& enemyField, size_t numberOfShips) {
-    size_t randomX;
-    size_t randomY;
+bool Computer::turn(Field& enemyField, unsigned numberOfShips) {
+    unsigned randomX;
+    unsigned randomY;
     bool isCorrectCell = false;
     while (!isCorrectCell) {
         randomX = rand() % 10;
         randomY = rand() % 10;
-        if (enemyField.getCell(randomX, randomY).getID() == 0) {
+        if (enemyField.getCell(randomX, randomY).getID() == 0 || enemyField.getCell(randomX, randomY).getID() / 10 == 2) {              // TODO(keberson): изменить условие
             isCorrectCell = true;
         }
     }
 
-    size_t offset = numberOfShips + numberOfShips % 10;
+    unsigned offset = numberOfShips + numberOfShips % 10;
     return attackEnemy(randomX, randomY, enemyField, offset);
 }

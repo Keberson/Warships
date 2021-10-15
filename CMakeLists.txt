@@ -8,6 +8,15 @@ set(CMAKE_BUILD_TYPE Debug)
 include_directories(include)
 
 add_executable(warships
+        include/bonus.h
+        include/field.h
+        include/game.h
+        include/gamerules.h
+        include/parser.h
+        include/ship.h
+        include/standards.h
+        include/ui.h
+        include/user.h
         src/bonus.cpp
         src/field.cpp
         src/game.cpp

@@ -16,7 +16,8 @@ private:
     std::vector<Player> _players;
     Computer _computer;
 public:
-    Game(std::string filename = "");
+    Game() {};
+    Game(std::string filename);
     void prepareToGame();
     void startGame();
 };

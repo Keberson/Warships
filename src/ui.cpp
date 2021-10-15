@@ -4,54 +4,109 @@
 
 // TODO(danza_): сделать консольный UI
 
-size_t ConsoleUI::displayFields(size_t width, size_t height) {
-    return 0;
+void ConsoleUI::displayFields(Field* leftField, Field* rightField) {
+    unsigned offset = 40;
+    displayTheField(leftField, 1);
+    displayTheField(rightField, offset);
 }
 
-size_t ConsoleUI::displayTheField(size_t width, size_t height) {
-    /*
-    unsigned thickness = 2;     //
-    unsigned rowWidth = thickness * 10 + thickness * 12;
-    unsigned colWidth = thickness * 10 + thickness * 12;
-    unsigned offset = 5;
+void ConsoleUI::displayTheField(Field* field, unsigned offset) {
+    unsigned space = 5;
+    unsigned widthField = 31;         // romax() / 2 - space;    widthCell*10 + 11*1
+    unsigned widthCell = 2;           // (widthField - (width + 1)) / numb;
+    unsigned heightCell = 1;          // widthCell / 2;
+    unsigned counterY = 0;
+    unsigned rowCounter = 0;
+    unsigned columnCounter = 0;
 
-    unsigned i;
-    unsigned j;
-    for (i = 1; i < colWidth; i++) {
-        for (j = 1; j < rowWidth; j++) {
-            if (((i / thickness) % thickness == 0) && ((j / thickness) % thickness == 0) &&
-                    ((i / thickness) * (j / thickness)) != 0) {
-                std::ostringstream ss;
-                ss << "\033[" << i << ';' << j << "H\033[40m ";
-                std::cout << ss.str();
-            } else {
-                std::ostringstream ss;
-                ss << "\033[" << i << ';' << j << "H\033[47m ";
-                std::cout << ss.str();
-            }
+    bool isBlackRow = false;
+
+    setCursor(1, offset);
+    std::cout << "   a  b  c  d  e  f  g  h  i  j";
+    while (rowCounter != (field->getHeight() + 1)) {
+        setCursor(counterY + 2, offset);
+        if (counterY % (heightCell + 1) == 0) {
+            isBlackRow = true;
+            rowCounter++;
+        } else {
+            isBlackRow = false;
+            std::cout.width(3);
+            std::cout << std::left << rowCounter;
         }
+
+        columnCounter = 0;
+        for (unsigned j = 1; j < widthField; j++) {
+            if (isBlackRow) {
+                setBackground();
+            } else {
+                if (j % (widthCell + 1) == 0) {
+                    setBackground();
+                    columnCounter++;
+                } else if (field->getCell(rowCounter - 1, columnCounter).getID() == 0) {
+                    setSeaCell();
+                } else if (field->getCell(rowCounter - 1, columnCounter).getID() / 10 == 2) {        // TODO(keberson): в будущем изменить условие (не деление на 10)
+                    setShippCell();
+                } else if (field->getCell(rowCounter - 1, columnCounter).getID() / 10 == 3) {
+                    setDestroyedShip();
+                } else {
+                    setMissCell();
+                }
+            }
+
+        }
+
+        setBackground();
+        counterY++;
     }
 
-    std::ostringstream ss;
-    ss << "\033[" << i << ";0H\033[40m ";
-    std::cout << ss.str();*/
-    return 1;
+    setBackground();
+    std::cout << std::endl;
 }
 
-size_t ConsoleUI::changeCellState(size_t x, size_t y, size_t id) {
-    return 0;
+void ConsoleUI::changeCellState(unsigned x, unsigned y, unsigned id) {
+
 }
 
-size_t ConsoleUI::outputResult() {
-    return 0;
+void ConsoleUI::outputResult() {
+
 }
 
 void ConsoleUI::clearScreen() {
     std::cout << "\033[2J";
 }
 
+void ConsoleUI::setBackground() {
+    std::cout << "\033[40m ";
+}
+
+void ConsoleUI::setSeaCell() {
+    std::cout << "\033[44m ";
+}
+
+void ConsoleUI::setShippCell() {
+    std::cout << "\033[42m ";
+}
+
+void ConsoleUI::setDestroyedShip() {
+    std::cout << "\033[41m ";
+}
+
+void ConsoleUI::setMissCell() {
+    std::cout << "\033[43m ";
+}
+
+void ConsoleUI::setCursor(unsigned x, unsigned y) {
+    std::cout << "\033[" << x << ";" << y << "H";
+}
+
 std::string ConsoleUI::getCell() {
     std::string tempStr;
     std::cin >> tempStr;
     return tempStr;
+}
+
+unsigned ConsoleUI::comax() {
+    struct winsize w;
+    ioctl(0, TIOCGWINSZ, &w);
+    return(w.ws_col);
 }
