@@ -64,8 +64,7 @@ void Game::startGame() {
         std::cout << "Computer is attacking" << std::endl;
         sleep(1);
 
-        while (isCanTurn) {
-            isCanTurn = _computer.turn(_players[0].getField(0), _rules.getNumberOfShips());
+        while (_computer.turn(_players[0].getField(0), _rules.getNumberOfShips())) {
             _ui.displayFields(_players[0].getField(0), _players[0].getField(1));
             std::cout << "Computer is attacking again" << std::endl;
             sleep(1);

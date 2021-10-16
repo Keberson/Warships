@@ -8,6 +8,8 @@ void ConsoleUI::displayFields(Field& leftField, Field& rightField) {
     //unsigned y = leftField.getHeight()*2 + 2;
     displayTheField(leftField, 1);
     displayTheField(rightField, offset);
+    setCursor(25, 1);
+    std::cout << "\033[J";
     setCursor(24, 1);
 }
 
