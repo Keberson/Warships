@@ -5,6 +5,7 @@
 #include <vector>
 
 #include "field.h"
+#include "ui.h"
 
 class User {
 private:

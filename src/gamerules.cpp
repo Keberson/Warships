@@ -1,9 +1,5 @@
 #include "gamerules.h"
 
-bool square_comparator(const void* first, const void* second) {
-
-}
-
 GameRules::GameRules(std::string filename) {
     parser = Parser(filename);
     parser.parse();

@@ -8,6 +8,7 @@
 
 class IUI {
 public:
+    virtual void displayMenu() = 0;
     virtual void displayFields(Field& leftField, Field& rightField) = 0;
     virtual void displayTheField(Field& field, unsigned offset) = 0;
     virtual void clearScreen() = 0;
@@ -17,6 +18,7 @@ public:
 class ConsoleUI: public IUI {
 public:
     ConsoleUI() {};
+    void displayMenu() {};
     void displayFields(Field& leftField, Field& rightField);
     void displayTheField(Field& field, unsigned offset);
     void clearScreen();

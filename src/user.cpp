@@ -71,13 +71,23 @@ bool User::attackEnemy(unsigned x, unsigned y, Field& enemyField) {
         enemyField.setID(x, y, 1);
         _field[1].setID(x, y, 1);
         return false;
-    } else if (id / 10 == 1) {
+    }
+
+    bool isInShip = false;
+    for (int i = 1; i <= ID_SHIPS_OFFSET / 10; ++i) {
+        if (id / 10 == i) {
+            isInShip = true;
+            break;
+        }
+    }
+
+    if (isInShip) {
         enemyField.setID(x, y, id + ID_SHIPS_OFFSET);
         _field[1].setID(x, y, id + ID_SHIPS_OFFSET);
         return true;
-    } else {
-        return false;
     }
+
+    return false;
 }
 
 
@@ -86,7 +96,7 @@ bool Player::turn(Field& enemyField) {
     unsigned y;
     std::string cell;
     std::cout << "\033[2K" << "Input attacking cell: ";
-    std::cin >> cell;                           // TODO(danza): Задание для 2ой версии: изменить систему ввода данных
+    std::cin >> cell;                           // TODO(keberson): Задание для 2ой версии: изменить систему ввода данных
     if (std::cin.eof()) {
         std::cout << "\033[?25h" << std::endl;
         exit(2);
@@ -119,40 +129,77 @@ bool Player::turn(Field& enemyField) {
             exit(2);
         }
     }
-
     std::cout << "\033A" << "\033[2K";
 
     if (attackEnemy(x, y, enemyField)) {
         bool isHaveShip = false;
         if (x + 1 < enemyField.getWidth()) {
-            if (enemyField.getCell(x + 1, y).getID() / 10 == 1) {
+            unsigned cellId = enemyField.getCell(x + 1, y).getID();
+            bool isInShip = false;
+            for (int i = 1; i <= ID_SHIPS_OFFSET / 10; ++i) {
+                if (cellId / 10 == i) {
+                    isInShip = true;
+                    break;
+                }
+            }
+
+            if (isInShip) {
                 std::cout << "Hit!" << std::endl;
                 isHaveShip = true;
             }
         }
 
         if (!isHaveShip && (x - 1 < enemyField.getWidth())) {
-            if (enemyField.getCell(x - 1, y).getID() / 10 == 1) {
+            unsigned cellId = enemyField.getCell(x - 1, y).getID();
+            bool isInShip = false;
+            for (int i = 1; i <= ID_SHIPS_OFFSET / 10; ++i) {
+                if (cellId / 10 == i) {
+                    isInShip = true;
+                    break;
+                }
+            }
+
+            if (isInShip) {
                 std::cout << "Hit!" << std::endl;
                 isHaveShip = true;
             }
         }
 
         if (!isHaveShip && (y + 1 < enemyField.getWidth())) {
-            if (enemyField.getCell(x, y + 1).getID() / 10 == 1) {
+            unsigned cellId = enemyField.getCell(x, y + 1).getID();
+            bool isInShip = false;
+            for (int i = 1; i <= ID_SHIPS_OFFSET / 10; ++i) {
+                if (cellId / 10 == i) {
+                    isInShip = true;
+                    break;
+                }
+            }
+
+            if (isInShip) {
                 std::cout << "Hit!" << std::endl;
                 isHaveShip = true;
             }
         }
         if (!isHaveShip && (y -1 < enemyField.getWidth())) {
-            if (enemyField.getCell(x, y - 1).getID() / 10 == 1) {
+            unsigned cellId = enemyField.getCell(x, y - 1).getID();
+            bool isInShip = false;
+            for (int i = 1; i <= ID_SHIPS_OFFSET / 10; ++i) {
+                if (cellId / 10 == i) {
+                    isInShip = true;
+                    break;
+                }
+            }
+
+            if (isInShip) {
                 std::cout << "Hit!" << std::endl;
                 isHaveShip = true;
             }
         }
 
         if (!isHaveShip) {
+
             // TODO(danza_): Задание для 2ой версии: обводка всех полей вокруг корабля
+
             std::cout << "Destroyed!" << std::endl;
         }
 

@@ -1,5 +1,7 @@
 #include <iostream>
+#include <fstream>
 #include <sys/ioctl.h>
+#include <string>
 
 #include "ui.h"
 
