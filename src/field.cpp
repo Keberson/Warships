@@ -13,16 +13,16 @@ Field::Field(unsigned width, unsigned height) {
 }
 
 void Field::setID(unsigned x, unsigned y, unsigned id) {
-    _cells[x*_width + y].setID(id);
-    if (id >= STANDARD_ID_START + 10) {                     // TODO(keberson): изменить условие, должно быть не + 10
+    _cells[x * _width + y].setID(id);
+    if (id >= STANDARD_ID_START + ID_SHIPS_OFFSET) {
         _numberOfHits++;
     }
 }
 
-std::ostream& operator << (std::ostream& out, Field& field) {
+std::ostream& operator << (std::ostream& out, Field& field) {       // Helper method
     out.width(3);
     out << ' ';
-    for (unsigned i = 0; i < field.getWidth(); ++i) {                // TODO(keberson): предусмотреть случай, когда ширина больше, чем 26
+    for (unsigned i = 0; i < field.getWidth(); ++i) {
         out.width(3);
         out << (char)('a' + i);
     }

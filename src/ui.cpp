@@ -47,9 +47,9 @@ void ConsoleUI::displayTheField(Field& field, unsigned offset) {
                     columnCounter++;
                 } else if (field.getCell(rowCounter - 1, columnCounter).getID() == 0) {
                     setSeaCell();
-                } else if (field.getCell(rowCounter - 1, columnCounter).getID() / 10 == 2) {        // TODO(keberson): в будущем изменить условие (не деление на 10)
+                } else if (field.getCell(rowCounter - 1, columnCounter).getID() / 10 == 1) {
                     setShippCell();
-                } else if (field.getCell(rowCounter - 1, columnCounter).getID() / 10 == 3) {
+                } else if (field.getCell(rowCounter - 1, columnCounter).getID() / 10 == 2) {
                     setDestroyedShip();
                 } else {
                     setMissCell();
@@ -64,14 +64,6 @@ void ConsoleUI::displayTheField(Field& field, unsigned offset) {
 
     setBackground();
     std::cout << std::endl;
-}
-
-void ConsoleUI::changeCellState(unsigned x, unsigned y, unsigned id) {
-
-}
-
-void ConsoleUI::outputResult() {
-
 }
 
 void ConsoleUI::clearScreen() {
@@ -102,10 +94,8 @@ void ConsoleUI::setCursor(unsigned x, unsigned y) {
     std::cout << "\033[" << x << ";" << y << "H";
 }
 
-std::string ConsoleUI::getCell() {
-    std::string tempStr;
-    std::cin >> tempStr;
-    return tempStr;
+void ConsoleUI::turnOffCursor() {
+    std::cout << "\033[?25l";
 }
 
 unsigned ConsoleUI::comax() {

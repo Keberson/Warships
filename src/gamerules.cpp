@@ -1,5 +1,9 @@
 #include "gamerules.h"
 
+bool square_comparator(const void* first, const void* second) {
+
+}
+
 GameRules::GameRules(std::string filename) {
     parser = Parser(filename);
     parser.parse();
@@ -8,7 +12,7 @@ GameRules::GameRules(std::string filename) {
     _widthField = (tempVector.empty() || std::stoi(tempVector[0]) <= 0) ? STANDARD_FIELD_WIDTH : std::stoi(tempVector[0]);
     tempVector = parser.getParserItem("rules", "height");
     _heightField = (tempVector.empty() || std::stoi(tempVector[0]) <= 0) ? STANDARD_FIELD_HEIGHT : std::stoi(tempVector[0]);
-    tempVector = parser.getParserItem("rules", "numberOfShip");                                                                     //TODO(keberson): если один из параметров настройки кораблей неверный, то и все параметры неверны, поэтому включаем режим Стандарт
+    tempVector = parser.getParserItem("rules", "numberOfShip");                                                                     // TODO(keberson): Задача для 2ой версии: если один из параметров настройки кораблей неверный, то и все параметры неверны, поэтому включаем режим Стандарт
     _numberOfShips = (tempVector.empty() || std::stoi(tempVector[0]) <= 0) ? STANDARD_NUMBER_OF_SHIPS : std::stoi(tempVector[0]);
     tempVector = parser.getParserItem("rules", "typeOfShips");
     _isCustomShips = (tempVector.empty() || tempVector[0] != "inactive" || tempVector[0] != "active") ?
@@ -19,20 +23,35 @@ GameRules::GameRules(std::string filename) {
     _squareOfShips = 0;
     for (unsigned i = 0; i < _numberOfShips; ++i, ++j) {
         if (_isCustomShips) {
-            // TODO(keberson): заполнение кастомными кораблями
+
+            // TODO(keberson): Задача для 2ой версии: заполнение кастомными кораблями и подсчёт площади кораблей
+
         } else {
             if (j >= STANDARD_SHIPS_NUMBER[shipSwitch]) {
                 j = 0;
                 shipSwitch++;
             }
 
-            // TODO(keberson): сортировка по width и length, чтобы с наибольшой площадью были в конце, а с наименьшим в начале
-            _ships.push_back(Ship(idCounter++, STANDARD_SHIPS_NAME[shipSwitch], STANDARD_SHIPS_WIDTH[shipSwitch],
-                                  STANDARD_SHIPS_HEIGHT[shipSwitch], STANDARD_SHIPS_ATTACK_RADIUS[shipSwitch]));
-        }
+            Ship temp_ship(idCounter++, STANDARD_SHIPS_NAME[shipSwitch], STANDARD_SHIPS_WIDTH[shipSwitch],
+                           STANDARD_SHIPS_HEIGHT[shipSwitch], STANDARD_SHIPS_ATTACK_RADIUS[shipSwitch]);
+            bool isEnd = true;
+            unsigned counter = 0;
+            for (auto item: _ships) {
+                if (item.getWidth() * item.getLength() < STANDARD_SHIPS_WIDTH[shipSwitch] * STANDARD_SHIPS_HEIGHT[shipSwitch]) {
+                    _ships.insert(_ships.begin() + counter, temp_ship);
+                    isEnd = false;
+                    break;
+                }
 
-        // TODO(keberson): переделать вычисление площади при использовании кастомных кораблей
-        _squareOfShips += STANDARD_SHIPS_HEIGHT[shipSwitch]*STANDARD_SHIPS_WIDTH[shipSwitch];
+                counter++;
+            }
+
+            if (isEnd) {
+                _ships.push_back(temp_ship);
+            }
+
+            _squareOfShips += STANDARD_SHIPS_HEIGHT[shipSwitch]*STANDARD_SHIPS_WIDTH[shipSwitch];
+        }
     }
 
     tempVector = parser.getParserItem("rules", "turnTime");
@@ -42,14 +61,13 @@ GameRules::GameRules(std::string filename) {
                         STANDARD_BONUSES : (tempVector[0] == "active");
     /*if (_isActiveBonuses) {
          tempVector = parser.getParserItem("rules", "isActiveBonuses");
-        TODO(keberson): сделать заполнение вектора _bonuses бонусами
+        TODO(keberson): Задача для 2ой версии: сделать заполнение вектора _bonuses бонусами
     }*/
 }
 
 Ship* GameRules::getShip(unsigned id) {
     for (unsigned i = 0; i < _numberOfShips; ++i) {
-        unsigned temp = _ships[i].getId();
-        if (_ships[i].getId() == id) {                    // TODO(keberson): поменять условие
+        if (_ships[i].getId() == id) {
             return &_ships[i];
         }
     }

@@ -5,21 +5,24 @@
 #include "game.h"
 
 void emergencyInterruption(int p) {
-    std::cout << "\033[?25h" << std::endl;
+    std::cout << "\033[?25h" << std::endl;      // Only for ConsoleUI
     exit(3);
 }
 
 Game::Game(std::string filename) {
     _rules = GameRules((filename.empty()) ? STANDARD_CONFIG_PATH : filename );
+    ID_SHIPS_OFFSET = _rules.getNumberOfShips() / 10 + ((_rules.getNumberOfShips() % 10 == 0) ? 0 : 1) * 10;
     _ui = ConsoleUI();
-    _players = { Player("Player1", _rules.getWidthField(), _rules.getHeightField()) };      // TODO(keberson): решить, как выбирать, кто будет играть
+    _players = { Player("Player1", _rules.getWidthField(), _rules.getHeightField()) };      // TODO(keberson): Задача для 3ий версии: решить, как выбирать, кто будет играть
     _computer = Computer("Computer", _rules.getWidthField(), _rules.getHeightField());
 }
 
 void Game::prepareToGame() {
-    std::cout << "\033[?25l";
+    _ui.turnOffCursor();            // Only for ConsoleUI
     _ui.clearScreen();
-    // TODO(keberson): создание экранов для нескольких пользователей
+
+    // TODO(keberson): Задача для 3ий версии: создание экранов для нескольких пользователей
+
     for (int i = _rules.getNumberOfShips() - 1; i >= 0; --i) {
         _players[0].placeShip(STANDARD_ID_START + i, _rules);
     }
@@ -37,12 +40,13 @@ void Game::startGame() {
     signal(SIGINT, emergencyInterruption);
 
     while (!isGameEnd) {
-        // TODO(keberson): реализация для случая, если 2 игрока
 
+        // TODO(keberson): Задача для 3ий версии: реализация для случая, если 2 игрока
+        // For ConsoleUI
         _ui.displayFields(_players[0].getField(0), _players[0].getField(1));
 
         while (isCanTurn) {
-            isCanTurn = _players[0].turn(_computer.getField(0), _rules.getNumberOfShips());
+            isCanTurn = _players[0].turn(_computer.getField(0));
             _ui.displayFields(_players[0].getField(0), _players[0].getField(1));
             sleep(1);
 
@@ -64,7 +68,7 @@ void Game::startGame() {
         std::cout << "Computer is attacking" << std::endl;
         sleep(1);
 
-        while (_computer.turn(_players[0].getField(0), _rules.getNumberOfShips())) {
+        while (_computer.turn(_players[0].getField(0))) {
             _ui.displayFields(_players[0].getField(0), _players[0].getField(1));
             std::cout << "Computer is attacking again" << std::endl;
             sleep(1);
@@ -77,6 +81,8 @@ void Game::startGame() {
         }
 
         isCanTurn = true;
+
+        // /For ConsoleUI
     }
 
     std::cout << std::endl << "Congratulations! " << winner << " is winner!" << std::endl;
