@@ -18,7 +18,7 @@ Game::Game(std::string filename) {
 }
 
 void Game::prepareToGame() {
-    _ui.turnOffCursor();            // Only for ConsoleUI
+    _ui.setInputMode();            // Only for ConsoleUI
     _ui.clearScreen();
 
     // TODO(keberson): Задача для 3ий версии: создание экранов для нескольких пользователей
@@ -40,17 +40,18 @@ void Game::startGame() {
     signal(SIGINT, emergencyInterruption);
 
     while (!isGameEnd) {
-
         // TODO(keberson): Задача для 3ий версии: реализация для случая, если 2 игрока
         // For ConsoleUI
-        _ui.displayFields(_players[0].getField(0), _players[0].getField(1));
+        _ui.displayFields(_players[0].getField(), _computer.getField());
+
+        isCanTurn = true;
 
         while (isCanTurn) {
-            isCanTurn = _players[0].turn(_computer.getField(0));
-            _ui.displayFields(_players[0].getField(0), _players[0].getField(1));
+            isCanTurn = _players[0].turn(_computer.getField(), _ui);
+            _ui.displayFields(_players[0].getField(), _computer.getField());
             sleep(1);
 
-            if (_players[0].getField(1).getNumberOfHits() == _rules.getSquareOfShips()) {
+            if (_computer.getField().getNumberOfHits() == _rules.getSquareOfShips()) {
                 isGameEnd = true;
                 winner = "Player";
                 break;
@@ -62,26 +63,21 @@ void Game::startGame() {
             break;
         }
 
-        isCanTurn = true;
-
-        _ui.displayFields(_players[0].getField(0), _players[0].getField(1));
+        _ui.displayFields(_players[0].getField(), _computer.getField());
         std::cout << "Computer is attacking" << std::endl;
         sleep(1);
 
-        while (_computer.turn(_players[0].getField(0))) {
-            _ui.displayFields(_players[0].getField(0), _players[0].getField(1));
+        while (_computer.turn(_players[0].getField(), _ui)) {
+            _ui.displayFields(_players[0].getField(), _computer.getField());
             std::cout << "Computer is attacking again" << std::endl;
             sleep(1);
 
-            if (_players[0].getField(0).getNumberOfHits() == _rules.getSquareOfShips()) {
+            if (_players[0].getField().getNumberOfHits() == _rules.getSquareOfShips()) {
                 isGameEnd = true;
                 winner = "Computer";
                 break;
             }
         }
-
-        isCanTurn = true;
-
         // /For ConsoleUI
     }
 
