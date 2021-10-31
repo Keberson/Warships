@@ -10,14 +10,14 @@
 class User {
 private:
     std::string _name;
-    std::vector<Field> _field;
+    Field _field;
 public:
     User() {};
     User(std::string name, unsigned widthField, unsigned heightField);
     void placeShip(unsigned id , GameRules& rules);
     bool attackEnemy(unsigned x, unsigned y, Field& enemyField);
-    Field& getField(unsigned number) { return _field[number]; };
-    virtual bool turn(Field& enemyField) = 0;
+    Field& getField() { return _field; };
+    virtual bool turn(Field& enemyField, ConsoleUI& ui) = 0;
     ~User() {};
 };
 
@@ -27,7 +27,7 @@ class Player: public User {
 public:
     Player() : User() {};
     Player(std::string name, unsigned widthField, unsigned heightField) : User(name, widthField, heightField) {};
-    bool turn(Field& enemyField);
+    bool turn(Field& enemyField, ConsoleUI& ui);
 
     friend class Computer;
 };
@@ -36,8 +36,7 @@ class Computer: public User {
 public:
     Computer() : User() {};
     Computer(std::string name, unsigned widthField, unsigned heightField) : User(name, widthField, heightField) {};
-    bool turn(Field& enemyField);
-
+    bool turn(Field& enemyField, ConsoleUI& ui);
     friend class Player;
 };
 
