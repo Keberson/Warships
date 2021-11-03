@@ -9,16 +9,32 @@ void emergencyInterruption(int p) {
     exit(3);
 }
 
-Game::Game(std::string filename) {
-    _rules = GameRules((filename.empty()) ? STANDARD_CONFIG_PATH : filename );
-    ID_SHIPS_OFFSET = _rules.getNumberOfShips() / 10 + ((_rules.getNumberOfShips() % 10 == 0) ? 0 : 1) * 10;
-    _ui = ConsoleUI();
-    _players = { Player("Player1", _rules.getWidthField(), _rules.getHeightField()) };      // TODO(keberson): Задача для 3ий версии: решить, как выбирать, кто будет играть
-    _computer = Computer("Computer", _rules.getWidthField(), _rules.getHeightField());
+Game::Game() {
+    _filename = STANDARD_CONFIG_PATH;
+    buildGame(false);
 }
 
+Game::Game(std::string filename) {
+    _filename = filename;
+    buildGame(false);
+}
+
+void Game::buildGame(bool isFullBuild) {
+    if (isFullBuild) {
+        _rules = GameRules((_filename.empty()) ? STANDARD_CONFIG_PATH : _filename );
+        ID_SHIPS_OFFSET = _rules.getNumberOfShips() / 10 + ((_rules.getNumberOfShips() % 10 == 0) ? 0 : 1) * 10;
+        _players = { Player("Player1", _rules.getWidthField(), _rules.getHeightField()) };      // TODO(keberson): Задача для 3ий версии: решить, как выбирать, кто будет играть
+        _computer = Computer("Computer", _rules.getWidthField(), _rules.getHeightField());
+    } else {
+        _ui = ConsoleUI();
+        _ui.setInputMode();            // Only for ConsoleUI
+    }
+
+    signal(SIGINT, emergencyInterruption);
+}
+
+
 void Game::prepareToGame() {
-    _ui.setInputMode();            // Only for ConsoleUI
     _ui.clearScreen();
 
     // TODO(keberson): Задача для 3ий версии: создание экранов для нескольких пользователей
@@ -37,7 +53,6 @@ void Game::startGame() {
     bool isGameEnd = false;
     bool isCanTurn = true;
     _ui.clearScreen();
-    signal(SIGINT, emergencyInterruption);
 
     while (!isGameEnd) {
         // TODO(keberson): Задача для 3ий версии: реализация для случая, если 2 игрока
@@ -82,4 +97,81 @@ void Game::startGame() {
     }
 
     std::cout << std::endl << "Congratulations! " << winner << " is winner!" << std::endl;
+}
+
+void Game::openMenu() {
+    unsigned rowCounter = _ui.getMenuStartIndex();
+    unsigned prevRow;
+    bool isSelected = false;
+    bool isEscape = false;
+    bool isArrows = false;
+    char c;
+
+    _ui.clearScreen();
+    _ui.buildMenu();
+
+    while (!isSelected) {
+        _ui.menuDoRowActive(rowCounter);
+        _ui.displayMenu();
+
+        c = getchar();
+
+        if (c == '\033') {
+            isEscape = true;
+        }
+
+        if (isEscape && c == '[') {
+            isArrows = true;
+        }
+
+        if (isArrows) {
+            prevRow = rowCounter;
+            if (c == 'B') {
+                if (rowCounter + 1 < _ui.getMenuSize() - 1) {
+                    rowCounter++;
+                } else {
+                    rowCounter = _ui.getMenuStartIndex();
+                }
+
+                _ui.menuDoRowInactive(prevRow);
+                _ui.menuDoRowActive(rowCounter);
+            }
+
+            if (c == 'A') {
+                if (rowCounter - 1 >= _ui.getMenuStartIndex()) {
+                    rowCounter--;
+                } else {
+                    rowCounter = _ui.getMenuSize() - 2;
+                }
+
+                _ui.menuDoRowInactive(prevRow);
+                _ui.menuDoRowActive(rowCounter);
+            }
+        }
+
+        if (c == '\n') {
+            isSelected = true;
+        }
+    }
+
+    rowCounter -= _ui.getMenuStartIndex();
+    switch (rowCounter) {
+        case 0:
+            buildGame(true);
+            prepareToGame();
+            startGame();
+            break;
+        case 1:
+            _ui.clearScreen();                  // TODO(keberson): подумать и сделать Настройки
+            std::cout << std::endl << "Options" << std::endl;
+            break;
+        case 2:
+            _ui.clearScreen();                  // TODO(keberson): подумать и сделать Титры
+            std::cout << std::endl << "Titles" << std::endl;
+            break;
+        case 3:
+            std::cout << "\033[?25h" << std::endl;      // Only for ConsoleUI
+            exit(1);
+            break;
+    }
 }

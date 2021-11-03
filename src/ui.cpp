@@ -1,15 +1,162 @@
 #include <iostream>
 #include <sys/ioctl.h>
+#include <string>
+#include <sstream>
 #include <termios.h>
 #include <unistd.h>
 
 #include "ui.h"
 
-struct termios saved_attributes;
+#define MENU_TEXT_COLOR 0
+#define MENU_BACKGROUND_COLOR 6
+#define MENU_ACTIVE_TEXT 7
 
-void reset_input_mode (void) {
-    tcsetattr (STDIN_FILENO, TCSANOW, &saved_attributes);
+struct termios savedAttributes;
+
+unsigned MENU_INTERACTIVE_STRING_START = 3;
+
+std::vector<std::string> MENU_RAW = {"", "Menu", "", "Start game", "Options", "Titles", "Exit", ""};
+
+std::string FIRST_STRING_START_SYMBOL = "╔";
+std::string FIRST_STRING_END_SYMBOL = "╗";
+std::string LAST_STRING_START_SYMBOL = "╚";
+std::string LAST_STRING_END_SYMBOL = "╝";
+std::string INACTIVE_SYMBOL = "║";
+std::string ACTIVE_SYMBOL_START = "╠";
+std::string ACTIVE_SYMBOL_END = "╣";
+
+class MenuString {
+private:
+    std::string _text;
+    std::string _finished;
+    short _color;
+    short _background;
+    bool _isActive;
+    unsigned _length;
+public:
+    MenuString() {};
+    MenuString(std::string text, short color, short background, unsigned length) :
+            _text(text), _color(color), _background(background), _length(length), _isActive(false) {};
+    void setText(std::string text) { _text = text; };
+    void setColor(short color) { _color = color; };
+    void setBackground(short background) { _background = background; };
+    void setLength(short length) { _length = length; };
+    void buildString(std::string startSymbol = INACTIVE_SYMBOL, std::string endSymbol = INACTIVE_SYMBOL);
+    void setActive();
+    void setInactive();
+    short getLength() { return _length; };
+    bool getActiveFlag() { return _isActive; };
+    friend std::ostream& operator << (std::ostream& out, MenuString& str);
+};
+
+void MenuString::buildString(std::string startSymbol, std::string endSymbol) {
+    short length = (_length - _text.length()) / 2 + (((_length - _text.length()) % 2 == 1) ? 1 : 0);
+    _finished += startSymbol;
+    if (_text.empty()) {
+        _finished.insert(_finished.end(), _length, ' ');
+    } else {
+        _finished.insert(_finished.end(), (_length - _text.length()) / 2, ' ');
+        _finished += _text;
+        _finished.insert(_finished.end(), length, ' ');
+    }
+
+    _finished += endSymbol;
 }
+
+void MenuString::setActive() {
+    _finished.erase(0, INACTIVE_SYMBOL.length());
+    _finished.insert(0, ACTIVE_SYMBOL_START);
+    _finished.erase(_finished.length() - INACTIVE_SYMBOL.length(), INACTIVE_SYMBOL.length());
+    _finished.insert(_finished.length() , ACTIVE_SYMBOL_END);
+    _isActive = true;
+}
+
+void MenuString::setInactive() {
+    _finished.erase(0, ACTIVE_SYMBOL_START.length());
+    _finished.insert(0, INACTIVE_SYMBOL);
+    _finished.erase(_finished.length() - ACTIVE_SYMBOL_END.length(), ACTIVE_SYMBOL_END.length());
+    _finished.insert(_finished.length() , INACTIVE_SYMBOL);
+    _isActive = false;
+}
+
+std::ostream& operator << (std::ostream& out, MenuString& str) {
+    std::string stream;
+    stream += "\033[2;4";
+    stream += str._background + '0';
+    if (str._isActive) {
+        stream += ";3";
+        stream += MENU_ACTIVE_TEXT + '0';
+    } else {
+        stream += ";3";
+        stream += str._color + '0';
+    }
+    stream += "m";
+
+    out << stream.c_str() << str._finished << "\033[0;37;40m";
+    return out;
+}
+
+std::vector<MenuString> MENU;
+
+void resetInputMode() {
+    tcsetattr(STDIN_FILENO, TCSANOW, &savedAttributes);
+}
+
+// ------------------------------------------------------------- Menu -------------------------------------------------
+
+void ConsoleUI::buildMenu() {
+    short max_length = 0;
+    for (auto item: MENU_RAW) {
+        if (item.length() > max_length) {
+            max_length = item.length();
+        }
+    }
+
+    max_length += 4;
+
+    for (unsigned i = 0; i < MENU_RAW.size(); ++i) {
+        MenuString tempClass(MENU_RAW[i], MENU_TEXT_COLOR, MENU_BACKGROUND_COLOR, max_length);
+        if (i == 0) {
+            tempClass.buildString(FIRST_STRING_START_SYMBOL, FIRST_STRING_END_SYMBOL);
+        } else if (i == MENU_RAW.size() - 1) {
+            tempClass.buildString(LAST_STRING_START_SYMBOL, LAST_STRING_END_SYMBOL);
+        } else {
+            tempClass.buildString();
+        }
+
+        MENU.push_back(tempClass);
+    }
+}
+
+void ConsoleUI::displayMenu() {
+    unsigned rowCounter = romax() / 2 - 4;
+    unsigned colCounter = comax() / 2;
+
+    for (auto item: MENU) {
+        setCursor(++rowCounter, colCounter - (item.getLength() / 2));
+        std::cout << item;
+    }
+
+    std::cout << "\033[37m";
+};
+
+unsigned ConsoleUI::getMenuSize() {
+    return MENU.size();
+}
+
+unsigned ConsoleUI::getMenuStartIndex() {
+    return MENU_INTERACTIVE_STRING_START;
+}
+
+void ConsoleUI::menuDoRowActive(unsigned row) {
+    MENU[row].setActive();
+}
+
+void ConsoleUI::menuDoRowInactive(unsigned row) {
+    MENU[row].setInactive();
+}
+
+// ------------------------------------------------------------- Game -------------------------------------------------
 
 void ConsoleUI::displayFields(Field& leftField, Field& rightField) {
     unsigned offset = 40;
@@ -87,8 +234,8 @@ void ConsoleUI::clearScreen() {
 
 void ConsoleUI::setInputMode() {
     struct termios tattr;
-    tcgetattr (STDIN_FILENO, &saved_attributes);
-    atexit(reset_input_mode);
+    tcgetattr (STDIN_FILENO, &savedAttributes);
+    atexit(resetInputMode);
     tcgetattr (STDIN_FILENO, &tattr);
     tattr.c_lflag &= ~(ICANON|ECHO);
     tattr.c_cc[VMIN] = 1;

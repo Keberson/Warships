@@ -15,11 +15,15 @@ private:
     ConsoleUI _ui;
     std::vector<Player> _players;
     Computer _computer;
-public:
-    Game() {};
-    Game(std::string filename);
+    std::string _filename;
+
+    void buildGame(bool isFullBuild);
     void prepareToGame();
     void startGame();
+public:
+    Game();
+    Game(std::string filename);
+    void openMenu();
 };
 
 #endif // WARSHIPS_GAME_H

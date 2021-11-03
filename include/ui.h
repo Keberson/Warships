@@ -18,7 +18,14 @@ public:
 class ConsoleUI: public IUI {
 public:
     ConsoleUI() {};
-    void displayMenu() {};
+    // Menu
+    void buildMenu();
+    void displayMenu();
+    unsigned getMenuSize();
+    void menuDoRowActive(unsigned row);
+    void menuDoRowInactive(unsigned row);
+    unsigned getMenuStartIndex();
+    // Game
     void displayFields(Field& leftField, Field& rightField);
     void displayTheField(Field& field, unsigned offset, bool isHide);
     void clearScreen();
@@ -33,7 +40,7 @@ public:
     void turnOffCursor();
     unsigned comax();
     unsigned romax();
-};
 
+};
 
 #endif // WARSHIPS_UI_H

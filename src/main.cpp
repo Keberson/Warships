@@ -5,9 +5,9 @@
 
 int main(int argc, char* argv[]) {
     srand(time(nullptr));
-    Game game("configs/game.cg");
-    game.prepareToGame();
-    game.startGame();
+    Game game;
+    game.openMenu();
 
+    std::cout << "\033[?25h" << std::endl;
     return 0;
 }
