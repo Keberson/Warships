@@ -28,6 +28,7 @@ void Game::buildGame(bool isFullBuild) {
     } else {
         _ui = ConsoleUI();
         _ui.setInputMode();            // Only for ConsoleUI
+        _ui.buildMenu();
     }
 
     signal(SIGINT, emergencyInterruption);
@@ -108,7 +109,6 @@ void Game::openMenu() {
     char c;
 
     _ui.clearScreen();
-    _ui.buildMenu();
 
     while (!isSelected) {
         _ui.menuDoRowActive(rowCounter);
@@ -151,10 +151,12 @@ void Game::openMenu() {
 
         if (c == '\n') {
             isSelected = true;
+            _ui.menuDoRowInactive(rowCounter);
         }
     }
 
     rowCounter -= _ui.getMenuStartIndex();
+    _ui.clearScreen();
     switch (rowCounter) {
         case 0:
             buildGame(true);
@@ -162,16 +164,26 @@ void Game::openMenu() {
             startGame();
             break;
         case 1:
-            _ui.clearScreen();                  // TODO(keberson): подумать и сделать Настройки
-            std::cout << std::endl << "Options" << std::endl;
+            openOptions();
             break;
         case 2:
-            _ui.clearScreen();                  // TODO(keberson): подумать и сделать Титры
-            std::cout << std::endl << "Titles" << std::endl;
+            openTitles();
             break;
         case 3:
+            _ui.clearScreen();
             std::cout << "\033[?25h" << std::endl;      // Only for ConsoleUI
             exit(1);
-            break;
     }
+}
+
+void Game::openOptions() {
+    _ui.clearScreen();
+    _ui.displayOptionsMenu();           // TODO(keberson): подумать и сделать Настройки
+}
+
+void Game::openTitles() {
+    _ui.clearScreen();
+    _ui.displayTitlesMenu();
+    _ui.clearScreen();
+    openMenu();
 }

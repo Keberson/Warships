@@ -25,7 +25,7 @@ std::string INACTIVE_SYMBOL = "║";
 std::string ACTIVE_SYMBOL_START = "╠";
 std::string ACTIVE_SYMBOL_END = "╣";
 
-class MenuString {
+class MenuString {          // TODO(keberson): подумать над строкой Action - действие при той или иной строке
 private:
     std::string _text;
     std::string _finished;
@@ -144,16 +144,66 @@ unsigned ConsoleUI::getMenuSize() {
     return MENU.size();
 }
 
-unsigned ConsoleUI::getMenuStartIndex() {
-    return MENU_INTERACTIVE_STRING_START;
-}
-
 void ConsoleUI::menuDoRowActive(unsigned row) {
     MENU[row].setActive();
 }
 
 void ConsoleUI::menuDoRowInactive(unsigned row) {
     MENU[row].setInactive();
+}
+
+unsigned ConsoleUI::getMenuStartIndex() {
+    return MENU_INTERACTIVE_STRING_START;
+}
+
+void ConsoleUI::displayOptionsMenu() {
+
+}
+
+void ConsoleUI::displayTitlesMenu() {
+    unsigned usec = 300000;
+    unsigned rows = romax();
+    unsigned col = comax() / 2;
+    std::vector<std::string> titles = { "The idea was invented by Kozov A.V.",
+                                        "The code was written by Kuzov M.Y. and Mandzhiev D.Kh.",
+                                        "The logic of the game was written by Kuzov M.Y.",
+                                        "The interface was written by Mandzhiev D.Kh." };
+    std::vector<int> stringRow;
+    for (auto item: titles) {
+        stringRow.push_back(rows);
+    }
+
+    for (unsigned i = 0; i < titles.size(); ++i) {
+        for (unsigned j = 0; j < i; ++j) {
+            setCursor(stringRow[0] + 1 + j, col - (titles[j].length() / 2));
+            std::cout << "\033[2K";
+        }
+
+        for (unsigned j = 0; j < i + 1; ++j) {
+            setCursor(stringRow[j]--, col - (titles[j].length() / 2));
+            std::cout << titles[j] << std::flush;
+        }
+
+        usleep(usec);
+    }
+
+    while (stringRow.back() >= 1) {
+        int i;
+
+        for (i = 0; i < titles.size(); ++i) {
+            setCursor(stringRow[0] + 1 + i, col - (titles[i].length() / 2));
+            std::cout << "\033[2K";
+        }
+
+        for (i = 0; i < titles.size(); ++i) {
+            if (stringRow[i] != 0) {
+                setCursor(stringRow[i]--, col - (titles[i].length() / 2));
+                std::cout << titles[i] << std::flush;
+            }
+        }
+
+        usleep(usec);
+    }
 }
 
 // ------------------------------------------------------------- Game -------------------------------------------------

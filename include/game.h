@@ -20,6 +20,8 @@ private:
     void buildGame(bool isFullBuild);
     void prepareToGame();
     void startGame();
+    void openOptions();
+    void openTitles();
 public:
     Game();
     Game(std::string filename);

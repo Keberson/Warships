@@ -25,6 +25,8 @@ public:
     void menuDoRowActive(unsigned row);
     void menuDoRowInactive(unsigned row);
     unsigned getMenuStartIndex();
+    void displayOptionsMenu();
+    void displayTitlesMenu();
     // Game
     void displayFields(Field& leftField, Field& rightField);
     void displayTheField(Field& field, unsigned offset, bool isHide);
@@ -40,7 +42,6 @@ public:
     void turnOffCursor();
     unsigned comax();
     unsigned romax();
-
 };
 
 #endif // WARSHIPS_UI_H
