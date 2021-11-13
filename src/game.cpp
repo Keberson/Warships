@@ -4,6 +4,12 @@
 
 #include "game.h"
 
+#define SIGNAL_MENU 1
+#define SIGNAL_START_GAME 2
+#define SIGNAL_OPTIONS 3
+#define SIGNAL_TITLES 4
+#define SIGNAL_EXIT 5
+
 void emergencyInterruption(int p) {
     std::cout << "\033[?25h" << std::endl;      // Only for ConsoleUI
     exit(3);
@@ -49,7 +55,7 @@ void Game::prepareToGame() {
     }
 }
 
-void Game::startGame() {
+short Game::startGame() {
     std::string winner;
     bool isGameEnd = false;
     bool isCanTurn = true;
@@ -63,13 +69,18 @@ void Game::startGame() {
         isCanTurn = true;
 
         while (isCanTurn) {
-            isCanTurn = _players[0].turn(_computer.getField(), _ui);
+            short turnSignal = _players[0].turn(_computer.getField(), _ui);
+            if (turnSignal == SIGNAL_GAME_EXIT) {
+                return SIGNAL_MENU;
+            }
+
+            isCanTurn = (turnSignal == SIGNAL_TURN_HIT);
+
             _ui.displayFields(_players[0].getField(), _computer.getField());
             sleep(1);
 
             if (_computer.getField().getNumberOfHits() == _rules.getSquareOfShips()) {
                 isGameEnd = true;
-                winner = "Player";
                 break;
             }
         }
@@ -98,9 +109,11 @@ void Game::startGame() {
     }
 
     std::cout << std::endl << "Congratulations! " << winner << " is winner!" << std::endl;
+    sleep(5);
+    return SIGNAL_MENU;
 }
 
-void Game::openMenu() {
+short Game::openMenu() {
     unsigned rowCounter = _ui.getMenuStartIndex();
     unsigned prevRow;
     bool isSelected = false;
@@ -159,31 +172,56 @@ void Game::openMenu() {
     _ui.clearScreen();
     switch (rowCounter) {
         case 0:
-            buildGame(true);
-            prepareToGame();
-            startGame();
-            break;
+            return SIGNAL_START_GAME;
         case 1:
-            openOptions();
-            break;
+            return SIGNAL_OPTIONS;
         case 2:
-            openTitles();
-            break;
+            return SIGNAL_TITLES;
         case 3:
-            _ui.clearScreen();
-            std::cout << "\033[?25h" << std::endl;      // Only for ConsoleUI
-            exit(1);
+        default:
+            return SIGNAL_EXIT;
     }
 }
 
-void Game::openOptions() {
+short Game::openOptions() {
     _ui.clearScreen();
     _ui.displayOptionsMenu();           // TODO(keberson): подумать и сделать Настройки
+    return SIGNAL_MENU;
 }
 
-void Game::openTitles() {
+short Game::openTitles() {
     _ui.clearScreen();
     _ui.displayTitlesMenu();
     _ui.clearScreen();
-    openMenu();
+    return SIGNAL_MENU;
+}
+
+void Game::launcher() {
+    bool isExit = false;
+    short chapter = SIGNAL_MENU;
+
+    while (!isExit) {
+        switch (chapter) {
+            case SIGNAL_MENU:
+                chapter = openMenu();
+                break;
+            case SIGNAL_START_GAME:
+                buildGame(true);
+                prepareToGame();
+                chapter = startGame();
+                break;
+            case SIGNAL_OPTIONS:
+                chapter = openOptions();
+                break;
+            case SIGNAL_TITLES:
+                chapter = openTitles();
+                break;
+            case SIGNAL_EXIT:
+                isExit = true;
+        }
+    }
+
+    _ui.clearScreen();
+    std::cout << "\033[?25h" << std::endl;      // Only for ConsoleUI
+    exit(1);
 }

@@ -89,7 +89,7 @@ bool User::attackEnemy(unsigned x, unsigned y, Field& enemyField) {
 }
 
 
-bool Player::turn(Field& enemyField, ConsoleUI& ui) {
+short Player::turn(Field& enemyField, ConsoleUI& ui) {
     std::cout << "\033[2K" << "Now your turn..." << "\033[s";
     int x = 0;
     int y = 0;
@@ -107,8 +107,7 @@ bool Player::turn(Field& enemyField, ConsoleUI& ui) {
         c = getchar();
 
         if (c == 'q') {
-            std::cout << "\033[?25h" << std::endl;
-            exit(2);
+            return SIGNAL_GAME_EXIT;
         }
 
         if (c == '\033') {
@@ -256,15 +255,15 @@ bool Player::turn(Field& enemyField, ConsoleUI& ui) {
             std::cout << "Destroyed!" << std::endl;
         }
 
-        return true;
+        return SIGNAL_TURN_HIT;
     } else {
         std::cout << "Miss..." << std::endl;
-        return false;
+        return SIGNAL_TURN_MISS;
     }
 }
 
 
-bool Computer::turn(Field& enemyField, ConsoleUI& ui) {
+short Computer::turn(Field& enemyField, ConsoleUI& ui) {
     unsigned randomX;
     unsigned randomY;
     bool isCorrectCell = false;

@@ -6,7 +6,7 @@
 int main(int argc, char* argv[]) {
     srand(time(nullptr));
     Game game;
-    game.openMenu();
+    game.launcher();
 
     std::cout << "\033[?25h" << std::endl;
     return 0;

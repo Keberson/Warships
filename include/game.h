@@ -17,15 +17,16 @@ private:
     Computer _computer;
     std::string _filename;
 
-    void buildGame(bool isFullBuild);
+    short openMenu();
+    void buildGame(bool isFullBuild = false);
     void prepareToGame();
-    void startGame();
-    void openOptions();
-    void openTitles();
+    short startGame();
+    short openOptions();
+    short openTitles();
 public:
     Game();
     Game(std::string filename);
-    void openMenu();
+    void launcher();
 };
 
 #endif // WARSHIPS_GAME_H
