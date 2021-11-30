@@ -14,6 +14,12 @@ const unsigned STANDARD_ID_START = 10;
 #define STANDARD_TURN_TIME 30
 #define STANDARD_BONUSES false
 
+#define OPTIONS_WIDTH_MIN 5
+#define OPTIONS_WIDTH_MAX 25
+
+#define OPTIONS_HEIGHT_MIN 5
+#define OPTIONS_HEIGHT_MAX 25
+
 const std::string STANDARD_SHIPS_NAME[] = { "OneCellShip", "TwoCellShip", "ThreeCellShip", "FourCellShip" };
 const unsigned STANDARD_SHIPS_WIDTH[] = { 1, 2, 3, 4 };
 const unsigned STANDARD_SHIPS_HEIGHT[] = { 1, 1, 1, 1};

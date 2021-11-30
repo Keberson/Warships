@@ -31,6 +31,8 @@ public:
     bool getFlagBonuses() { return _isActiveBonuses; };
     unsigned getSquareOfShips() { return _squareOfShips; };
     Ship* getShip(unsigned id);
+    void setWidthField(unsigned width) { _widthField = width; };
+    void setHeightField(unsigned height) { _heightField = height; };
 };
 
 

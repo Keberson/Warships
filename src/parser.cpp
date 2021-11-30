@@ -27,9 +27,8 @@ std::vector<std::pair<std::string, std::string>>* Parser::getParserPointer(std::
     return nullptr;
 }
 
-
 void Parser::parse() {
-    std::fstream cgfile(_filename);
+    std::ifstream cgfile(_filename.c_str());
     std::string line;
     std::vector<std::pair<std::string, std::string>>* addressVariable = nullptr;
 
@@ -45,7 +44,7 @@ void Parser::parse() {
                 auto beforeSymbol = line.substr(0, symbolPos);
                 auto afterSymbol = line.substr(symbolPos+1);
                 beforeSymbol = deleteSymbols(beforeSymbol, "\t ");
-                afterSymbol = deleteSymbols(afterSymbol, "\t ");
+                afterSymbol = deleteSymbols(afterSymbol, "\t \n\r");
                 if (afterSymbol.empty()) {
                     addressVariable = getParserPointer(beforeSymbol);
                 } else {

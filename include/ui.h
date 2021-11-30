@@ -22,11 +22,17 @@ public:
     void buildMenu();
     void displayMenu();
     unsigned getMenuSize();
-    void menuDoRowActive(unsigned row);
-    void menuDoRowInactive(unsigned row);
+    unsigned getOptionsSize();
+    void menuDoRowActive(std::string chapter, unsigned row);
+    void menuDoRowInactive(std::string chapter, unsigned row);
+    void menuDoValueActive(unsigned row);
+    void menuDoValueInactive(unsigned row);
     unsigned getMenuStartIndex();
-    void displayOptionsMenu();
-    void displayTitlesMenu();
+    unsigned getOptionsStartIndex();
+    void displayOptions();
+    void displayTitles();
+    void synchronizeOptionsRatio(std::vector<std::string>& ratios);
+    void setOptionsRatio(unsigned row, std::string str);
     // Game
     void displayFields(Field& leftField, Field& rightField);
     void displayTheField(Field& field, unsigned offset, bool isHide);

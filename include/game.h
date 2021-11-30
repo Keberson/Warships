@@ -18,11 +18,12 @@ private:
     std::string _filename;
 
     short openMenu();
-    void buildGame(bool isFullBuild = false);
+    void buildGame();
     void prepareToGame();
     short startGame();
     short openOptions();
     short openTitles();
+    void loadFromFile();
 public:
     Game();
     Game(std::string filename);

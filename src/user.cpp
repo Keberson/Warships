@@ -5,6 +5,9 @@
 #include "standards.h"
 #include "user.h"
 
+unsigned prevX = 0;
+unsigned prevY = 0;
+
 User::User(std::string name, unsigned widthField, unsigned heightField) {
     _name = name;
     _field = Field(widthField, heightField);
@@ -12,6 +15,8 @@ User::User(std::string name, unsigned widthField, unsigned heightField) {
 
 void User::placeShip(unsigned id , GameRules& rules) {
     // TODO(keberson): Задание для 2ой версии: установка кораблей на игровое поле либо рандом, либо считывая с консоли (сделать)
+    prevX = 0;
+    prevY = 0;
     Ship* currentShip = rules.getShip(id);
     int randomX;
     int randomY;
@@ -90,9 +95,14 @@ bool User::attackEnemy(unsigned x, unsigned y, Field& enemyField) {
 
 
 short Player::turn(Field& enemyField, ConsoleUI& ui) {
-    std::cout << "\033[2K" << "Now your turn..." << "\033[s";
-    int x = 0;
-    int y = 0;
+    int x = prevX;
+    int y = prevY;
+    std::string tempStr = (char)(y + 'a') + ((x == 9) ? "10" : std::to_string(x + 1) + ' ');
+    std::cout << "\033[2K" << "Now your turn..." << std::endl;
+    std::cout << "Attack this cell: " << "\033[s" << tempStr << std::endl << std::endl;
+    std::cout << "\033[32m" << "Use the arrows (← ↑ ↓ →) to move around the playing field, press "
+                << "Enter when you select the desired cell" << "\033[37m";
+
     unsigned cellID = enemyField.getCell(x, y).getID();
     enemyField.setID(x, y, 2);
 
@@ -158,6 +168,8 @@ short Player::turn(Field& enemyField, ConsoleUI& ui) {
 
             cellID = enemyField.getCell(x, y).getID();
             enemyField.setID(x, y, 2);
+            std::string tempStr = (char)(y + 'a') + ((x == 9) ? "10" : std::to_string(x + 1) + ' ');
+            std::cout << "\033[u" << tempStr;
         }
 
         if (c == '\n') {
@@ -175,7 +187,7 @@ short Player::turn(Field& enemyField, ConsoleUI& ui) {
             } else {
                 ui.setCursor(24, 1);
                 std::cout << "\033[2K";
-                std::cout << "Try again";
+                std::cout << "\033[36m" << "Try again" << "\033[37m" ;
             }
         }
     }
@@ -184,6 +196,8 @@ short Player::turn(Field& enemyField, ConsoleUI& ui) {
     std::cout << "\033[2K";
 
     if (attackEnemy(x, y, enemyField)) {
+        prevX = x;
+        prevY = y;
         bool isHaveShip = false;
         if (x + 1 < enemyField.getWidth()) {
             cellID = enemyField.getCell(x + 1, y).getID();
@@ -196,7 +210,7 @@ short Player::turn(Field& enemyField, ConsoleUI& ui) {
             }
 
             if (isInShip) {
-                std::cout << "Hit!" << std::endl;
+                std::cout << "\033[31m" << "Hit!" << "\033[37m" << std::endl;
                 isHaveShip = true;
             }
         }
@@ -212,7 +226,7 @@ short Player::turn(Field& enemyField, ConsoleUI& ui) {
             }
 
             if (isInShip) {
-                std::cout << "Hit!" << std::endl;
+                std::cout << "\033[31m" << "Hit!" << "\033[37m" << std::endl;
                 isHaveShip = true;
             }
         }
@@ -228,11 +242,12 @@ short Player::turn(Field& enemyField, ConsoleUI& ui) {
             }
 
             if (isInShip) {
-                std::cout << "Hit!" << std::endl;
+                std::cout << "\033[31m" << "Hit!" << "\033[37m" << std::endl;
                 isHaveShip = true;
             }
         }
-        if (!isHaveShip && (y -1 < enemyField.getWidth())) {
+
+        if (!isHaveShip && (y - 1 < enemyField.getWidth())) {
             cellID = enemyField.getCell(x, y - 1).getID();
             bool isInShip = false;
             for (int i = 1; i <= ID_SHIPS_OFFSET / 10; ++i) {
@@ -243,21 +258,94 @@ short Player::turn(Field& enemyField, ConsoleUI& ui) {
             }
 
             if (isInShip) {
-                std::cout << "Hit!" << std::endl;
+                std::cout << "\033[31m" << "Hit!" << "\033[37m" << std::endl;
                 isHaveShip = true;
             }
         }
 
         if (!isHaveShip) {
-
             // TODO(keberson): Задание для 2ой версии: обводка всех полей вокруг корабля
+            // Только для кораблей в ширину 1. Переделать!!!
+            /*int directionX = 0;
+            int directionY = 0;
+            bool isNotEdgeX = false;
+            bool isNotEdgeY = false;
+            bool isOneCellShip = false;
 
-            std::cout << "Destroyed!" << std::endl;
+            if (x + 1 < enemyField.getHeight()) {
+                cellID = enemyField.getCell(x + 1, y).getID();
+                for (int i = 1; i <= ID_SHIPS_OFFSET / 10; ++i) {
+                    if (cellID / 10 == i) {
+                        directionX++;
+                        break;
+                    }
+                }
+            }
+
+            if (x - 1 >= 0) {
+                cellID = enemyField.getCell(x - 1, y).getID();
+                for (int i = 1; i <= ID_SHIPS_OFFSET / 10; ++i) {
+                    if (cellID / 10 == i) {
+                        directionX++;
+                        break;
+                    }
+                }
+            }
+
+            if (y + 1 < enemyField.getWidth()) {
+                cellID = enemyField.getCell(x, y + 1).getID();
+                for (int i = 1; i <= ID_SHIPS_OFFSET / 10; ++i) {
+                    if (cellID / 10 == i) {
+                        directionY++;
+                        break;
+                    }
+                }
+            }
+
+            if (y - 1 >= 0) {
+                cellID = enemyField.getCell(x, y - 1).getID();
+                for (int i = 1; i <= ID_SHIPS_OFFSET / 10; ++i) {
+                    if (cellID / 10 == i) {
+                        directionY++;
+                        break;
+                    }
+                }
+            }
+
+            if (directionX == 0 && directionY == 0) {
+                isOneCellShip = true;
+            }
+
+            if (directionX == 2) {
+                isNotEdgeX = true;
+            }
+
+            if (directionY == 2) {
+                isNotEdgeY = true;
+            }
+
+            if (isOneCellShip) {
+                for (int i = -1; i <= 1; ++i) {
+                    for (int j = -1; j <= 1; ++j) {
+                        if (i != 0 || j != 0) {
+                            if (x + i >= 0 && x + i < enemyField.getHeight() && y + j >= 0 &&
+                                y + j < enemyField.getWidth()) {
+                                enemyField.setID(x + i, y + j, 1);
+                            }
+                        }
+                    }
+                }
+            }
+
+            if (isNotEdgeX) */
+            std::cout << "\033[31m" << "Destroyed!" << "\033[37m" << std::endl;
         }
 
         return SIGNAL_TURN_HIT;
     } else {
-        std::cout << "Miss..." << std::endl;
+        prevX = x;
+        prevY = y;
+        std::cout << "\033[33m" << "Miss..." << "\033[37m" << std::endl;
         return SIGNAL_TURN_MISS;
     }
 }

@@ -7,15 +7,32 @@
 
 #include "ui.h"
 
+#define TITLES_DELAY 300000
+
 #define MENU_TEXT_COLOR 0
 #define MENU_BACKGROUND_COLOR 6
 #define MENU_ACTIVE_TEXT 7
+#define OPTIONS_ACTIVE_BACKGROUND_COLOR 3
+
+#define MENU_INDENT 3
 
 struct termios savedAttributes;
 
 unsigned MENU_INTERACTIVE_STRING_START = 3;
+unsigned OPTIONS_INTERACTIVE_STRING_START = 3;
 
+std::vector<std::string> TITLES = { "The idea was invented by Kozov A.V.",
+                                    "The code was written by Kuzov M.Y. and Mandzhiev D.Kh.",
+                                    "The logic of the game was written by Kuzov M.Y.",
+                                    "The interface was written by Mandzhiev D.Kh.",
+                                    "Pavlov P.S. and Kolotilin V.S. helped in testing."};
+// Two last strings always are not interactive
 std::vector<std::string> MENU_RAW = {"", "Menu", "", "Start game", "Options", "Titles", "Exit", ""};
+std::vector<std::string> OPTIONS_RAW = {"", "Options", "", "Width: ", "Height: ", "Exit", ""};
+
+std::vector<std::string> OPTIONS_RATIOS_UI;
+
+// TODO(keberson): перенести это куда-то в другое место, это не относится к ui => его здесь не должно быть
 
 std::string FIRST_STRING_START_SYMBOL = "╔";
 std::string FIRST_STRING_END_SYMBOL = "╗";
@@ -28,38 +45,62 @@ std::string ACTIVE_SYMBOL_END = "╣";
 class MenuString {          // TODO(keberson): подумать над строкой Action - действие при той или иной строке
 private:
     std::string _text;
+    std::string _value;
     std::string _finished;
     short _color;
     short _background;
-    bool _isActive;
+    short _backgroundValue;
+    bool _isActiveRow;
+    bool _isActiveValue;
     unsigned _length;
 public:
     MenuString() {};
-    MenuString(std::string text, short color, short background, unsigned length) :
-            _text(text), _color(color), _background(background), _length(length), _isActive(false) {};
+    MenuString(std::string text, std::string value, short color, short background, short backgroundValue, unsigned length) :
+            _text(text), _value(value), _color(color), _background(background), _backgroundValue(backgroundValue),
+            _length(length), _isActiveRow(false), _isActiveValue(false) {};
     void setText(std::string text) { _text = text; };
+    void setValue(std::string value) { _value = value; };
     void setColor(short color) { _color = color; };
     void setBackground(short background) { _background = background; };
+    void setBackgroundValue(short background) { _backgroundValue = background; };
     void setLength(short length) { _length = length; };
-    void buildString(std::string startSymbol = INACTIVE_SYMBOL, std::string endSymbol = INACTIVE_SYMBOL);
+    void setValueFlag(bool flag) { _isActiveValue = flag; };
+    void buildString(std::string startSymbol = INACTIVE_SYMBOL, std::string endSymbol = INACTIVE_SYMBOL,
+                     std::string alignment = "center");
     void setActive();
     void setInactive();
     short getLength() { return _length; };
-    bool getActiveFlag() { return _isActive; };
+    std::string getText() { return _text; };
+    std::string getValue() { return _value; };
+    bool getActiveFlag() { return _isActiveRow; };
+    bool getActiveValueFlag() { return _isActiveValue; };
     friend std::ostream& operator << (std::ostream& out, MenuString& str);
 };
 
-void MenuString::buildString(std::string startSymbol, std::string endSymbol) {
-    short length = (_length - _text.length()) / 2 + (((_length - _text.length()) % 2 == 1) ? 1 : 0);
-    _finished += startSymbol;
-    if (_text.empty()) {
-        _finished.insert(_finished.end(), _length, ' ');
-    } else {
-        _finished.insert(_finished.end(), (_length - _text.length()) / 2, ' ');
-        _finished += _text;
-        _finished.insert(_finished.end(), length, ' ');
+void MenuString::buildString(std::string startSymbol, std::string endSymbol, std::string alignment) {
+    short leftLength = (_length - _text.length() - _value.length()) / 2;
+    short rightLength = (_length - _text.length() - _value.length()) / 2 + (_length - _text.length() - _value.length()) % 2;
+    if (alignment == "left") {
+        leftLength = MENU_INDENT;
+        rightLength = MENU_INDENT;
     }
 
+    _finished.clear();
+    _finished += startSymbol;
+    _finished.insert(_finished.end(), leftLength, ' ');
+
+    if (!_text.empty()) {
+        _finished += _text;
+        if (alignment == "left") {
+            _finished.insert(_finished.end(), _length - _value.length() - _text.length() - leftLength - rightLength, ' ');
+        }
+
+        _finished += _value;
+    } else {
+        _finished.insert(_finished.end(), _length - leftLength - rightLength, ' ');
+    }
+
+    _finished.insert(_finished.end(), rightLength, ' ');
     _finished += endSymbol;
 }
 
@@ -68,7 +109,7 @@ void MenuString::setActive() {
     _finished.insert(0, ACTIVE_SYMBOL_START);
     _finished.erase(_finished.length() - INACTIVE_SYMBOL.length(), INACTIVE_SYMBOL.length());
     _finished.insert(_finished.length() , ACTIVE_SYMBOL_END);
-    _isActive = true;
+    _isActiveRow = true;
 }
 
 void MenuString::setInactive() {
@@ -76,14 +117,15 @@ void MenuString::setInactive() {
     _finished.insert(0, INACTIVE_SYMBOL);
     _finished.erase(_finished.length() - ACTIVE_SYMBOL_END.length(), ACTIVE_SYMBOL_END.length());
     _finished.insert(_finished.length() , INACTIVE_SYMBOL);
-    _isActive = false;
+    _isActiveRow = false;
 }
 
 std::ostream& operator << (std::ostream& out, MenuString& str) {
+    std::string row = (str._isActiveValue) ? str._finished.substr(0, str._finished.find(str._value)) : str._finished;
     std::string stream;
     stream += "\033[2;4";
     stream += str._background + '0';
-    if (str._isActive) {
+    if (str._isActiveRow) {
         stream += ";3";
         stream += MENU_ACTIVE_TEXT + '0';
     } else {
@@ -92,14 +134,26 @@ std::ostream& operator << (std::ostream& out, MenuString& str) {
     }
     stream += "m";
 
-    out << stream.c_str() << str._finished << "\033[0;37;40m";
+    out << stream.c_str() << row;
+    if (str._isActiveValue) {
+        std::string anyStream;
+        anyStream += "\033[2;4";
+        anyStream += str._backgroundValue + '0';
+        anyStream += "m";
+        out << anyStream.c_str() << str._value;
+        out << stream.c_str() << str._finished.substr(str._finished.find(str._value) + str._value.length());
+    }
+
+    out << "\033[0;37;40m";
     return out;
 }
 
 std::vector<MenuString> MENU;
+std::vector<MenuString> OPTIONS;
 
 void resetInputMode() {
     tcsetattr(STDIN_FILENO, TCSANOW, &savedAttributes);
+    std::cout << "\033[2J";
 }
 
 // ------------------------------------------------------------- Menu -------------------------------------------------
@@ -115,16 +169,43 @@ void ConsoleUI::buildMenu() {
     max_length += 4;
 
     for (unsigned i = 0; i < MENU_RAW.size(); ++i) {
-        MenuString tempClass(MENU_RAW[i], MENU_TEXT_COLOR, MENU_BACKGROUND_COLOR, max_length);
+        MenuString tempClass(MENU_RAW[i], "", MENU_TEXT_COLOR, MENU_BACKGROUND_COLOR, 0, max_length);
         if (i == 0) {
-            tempClass.buildString(FIRST_STRING_START_SYMBOL, FIRST_STRING_END_SYMBOL);
+            tempClass.buildString(FIRST_STRING_START_SYMBOL, FIRST_STRING_END_SYMBOL, "center");
         } else if (i == MENU_RAW.size() - 1) {
-            tempClass.buildString(LAST_STRING_START_SYMBOL, LAST_STRING_END_SYMBOL);
+            tempClass.buildString(LAST_STRING_START_SYMBOL, LAST_STRING_END_SYMBOL, "center");
         } else {
-            tempClass.buildString();
+            tempClass.buildString(INACTIVE_SYMBOL, INACTIVE_SYMBOL, "center");
         }
 
         MENU.push_back(tempClass);
+    }
+
+    max_length = 0;
+    for (unsigned i = 0; i < OPTIONS_RAW.size(); ++i) {
+        if (OPTIONS_RAW[i].length() + OPTIONS_RATIOS_UI[i].length() > max_length) {
+            max_length = OPTIONS_RAW[i].length() + OPTIONS_RATIOS_UI[i].length();
+        }
+    }
+
+    max_length += 6;
+
+    for (unsigned i = 0; i < OPTIONS_RAW.size(); ++i) {
+        MenuString tempClass(OPTIONS_RAW[i], OPTIONS_RATIOS_UI[i], MENU_TEXT_COLOR, MENU_BACKGROUND_COLOR,
+                             OPTIONS_ACTIVE_BACKGROUND_COLOR, max_length);
+        if (i == 0) {
+            tempClass.buildString(FIRST_STRING_START_SYMBOL, FIRST_STRING_END_SYMBOL);
+        } else if (i == OPTIONS_RAW.size() - 2) {
+            tempClass.buildString(INACTIVE_SYMBOL, INACTIVE_SYMBOL, "center");
+        } else if (i == OPTIONS_RAW.size() - 1) {
+            tempClass.buildString(LAST_STRING_START_SYMBOL, LAST_STRING_END_SYMBOL);
+        } else if (i == 1) {
+            tempClass.buildString(INACTIVE_SYMBOL, INACTIVE_SYMBOL, "center");
+        } else {
+            tempClass.buildString(INACTIVE_SYMBOL, INACTIVE_SYMBOL, "center");
+        }
+
+        OPTIONS.push_back(tempClass);
     }
 }
 
@@ -144,66 +225,104 @@ unsigned ConsoleUI::getMenuSize() {
     return MENU.size();
 }
 
-void ConsoleUI::menuDoRowActive(unsigned row) {
-    MENU[row].setActive();
+unsigned ConsoleUI::getOptionsSize() {
+    return OPTIONS.size();
 }
 
-void ConsoleUI::menuDoRowInactive(unsigned row) {
-    MENU[row].setInactive();
+
+void ConsoleUI::menuDoRowActive(std::string chapter, unsigned row) {
+    if (chapter == "menu") {
+        MENU[row].setActive();
+    } else if (chapter == "options") {
+        OPTIONS[row].setActive();
+    }
+}
+
+void ConsoleUI::menuDoRowInactive(std::string chapter, unsigned row) {
+    if (chapter == "menu") {
+        MENU[row].setInactive();
+    } else if (chapter == "options") {
+        OPTIONS[row].setInactive();
+    }
+}
+
+void ConsoleUI::menuDoValueActive(unsigned row) {
+    OPTIONS[row].setValueFlag(true);
+}
+
+void ConsoleUI::menuDoValueInactive(unsigned row) {
+    OPTIONS[row].setValueFlag(false);
 }
 
 unsigned ConsoleUI::getMenuStartIndex() {
     return MENU_INTERACTIVE_STRING_START;
 }
 
-void ConsoleUI::displayOptionsMenu() {
-
+unsigned ConsoleUI::getOptionsStartIndex() {
+    return OPTIONS_INTERACTIVE_STRING_START;
 }
 
-void ConsoleUI::displayTitlesMenu() {
-    unsigned usec = 300000;
+void ConsoleUI::displayOptions() {
+    unsigned rowCounter = romax() / 2 - 4;
+    unsigned colCounter = comax() / 2;
+
+    for (auto item: OPTIONS) {
+        setCursor(++rowCounter, colCounter - (item.getLength() / 2));
+        std::cout << item;
+    }
+
+    std::cout << "\033[37m";
+}
+
+void ConsoleUI::displayTitles() {
     unsigned rows = romax();
     unsigned col = comax() / 2;
-    std::vector<std::string> titles = { "The idea was invented by Kozov A.V.",
-                                        "The code was written by Kuzov M.Y. and Mandzhiev D.Kh.",
-                                        "The logic of the game was written by Kuzov M.Y.",
-                                        "The interface was written by Mandzhiev D.Kh." };
     std::vector<int> stringRow;
-    for (auto item: titles) {
+    for (auto item: TITLES) {
         stringRow.push_back(rows);
     }
 
-    for (unsigned i = 0; i < titles.size(); ++i) {
+    for (unsigned i = 0; i < TITLES.size(); ++i) {
         for (unsigned j = 0; j < i; ++j) {
-            setCursor(stringRow[0] + 1 + j, col - (titles[j].length() / 2));
+            setCursor(stringRow[0] + 1 + j, col - (TITLES[j].length() / 2));
             std::cout << "\033[2K";
         }
 
         for (unsigned j = 0; j < i + 1; ++j) {
-            setCursor(stringRow[j]--, col - (titles[j].length() / 2));
-            std::cout << titles[j] << std::flush;
+            setCursor(stringRow[j]--, col - (TITLES[j].length() / 2));
+            std::cout << TITLES[j] << std::flush;
         }
 
-        usleep(usec);
+        usleep(TITLES_DELAY);
     }
 
     while (stringRow.back() >= 1) {
         int i;
 
-        for (i = 0; i < titles.size(); ++i) {
-            setCursor(stringRow[0] + 1 + i, col - (titles[i].length() / 2));
+        for (i = 0; i < TITLES.size(); ++i) {
+            setCursor(stringRow[0] + 1 + i, col - (TITLES[i].length() / 2));
             std::cout << "\033[2K";
         }
 
-        for (i = 0; i < titles.size(); ++i) {
+        for (i = 0; i < TITLES.size(); ++i) {
             if (stringRow[i] != 0) {
-                setCursor(stringRow[i]--, col - (titles[i].length() / 2));
-                std::cout << titles[i] << std::flush;
+                setCursor(stringRow[i]--, col - (TITLES[i].length() / 2));
+                std::cout << TITLES[i] << std::flush;
             }
         }
 
-        usleep(usec);
+        usleep(TITLES_DELAY);
     }
+}
+
+void ConsoleUI::setOptionsRatio(unsigned row, std::string ratio) {
+    OPTIONS_RATIOS_UI[row] = ratio;
+    OPTIONS[row].setValue(ratio);
+    OPTIONS[row].buildString(ACTIVE_SYMBOL_START, ACTIVE_SYMBOL_END);
+}
+
+void ConsoleUI::synchronizeOptionsRatio(std::vector<std::string>& ratios) {
+    OPTIONS_RATIOS_UI = ratios;
 }
 
 // ------------------------------------------------------------- Game -------------------------------------------------
@@ -280,7 +399,6 @@ void ConsoleUI::displayTheField(Field& field, unsigned offset, bool isHide) {
 void ConsoleUI::clearScreen() {
     std::cout << "\033[2J";
 }
-
 
 void ConsoleUI::setInputMode() {
     struct termios tattr;

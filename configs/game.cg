@@ -1,46 +1,40 @@
-rules:				// ПРАВИЛА ИГРЫ
-	width: 10			    // Ширина поля
-	height: 10			    // Высота поля
-	numbOfShips: 10			// Количество кораблей
-	typeOfShips: classic	// Типы кораблей (classic - стандартный набор, custom - кастомизированный набор кораблей)
-	timeForTurn: 20			// Время хода в секундах
-	bonuses: inactive		// Бонусы (active включены, inactive отключены)
+rules:
+    width: 10
+    height: 10
+    numberOfShips: 10
+    typeOfShips: classic
+    bonuses: inactive
 ~~~
-ships:				// КОРАБЛИ
-	name: fourCellsShip		// Имя корабля
-	length: 4			    // Длина корабля
-	width: 1		    	// Ширина корабля
-	attackRadius: 1			// Радиус атаки
-	numberShips: 1			// Количество кораблей данного типа
-	---
-	name: threeCellsShip	// Имя корабля
-	length: 3			    // Длина корабля
-	width: 1			    // Ширина корабля
-	attackRadius: 1			// Радиус атаки
-	numberShips: 2			// Количество кораблей данного типа
-	---
-	name: twoCellsShip		// Имя корабля
-	length: 2		    	// Длина корабля
-	width: 1		    	// Ширина корабля
-	attackRadius: 1			// Радиус атаки
-	numberShips: 3			// Количество кораблей данного типа
-	---
-	name: oneCellShip		// Имя корабля
-	length: 1		    	// Длина корабля
-	width: 1		    	// Ширина корабля
-	attackRadius: 1			// Радиус атаки
-	numberShips: 4			// Количество кораблей данного типа
+ships:
+    name: fourCellsShip
+    length: 4
+    width: 1
+    attackRadius: 1
+    numberOfShips: 1
+    ---
+    name: threeCellsShip
+    length: 3
+    width: 1
+    attackRadius: 1
+    numberOfShips: 2
+    ---
+    name: twoCellsShip
+    length: 2
+    width: 1
+    attackRadius: 1
+    numberOfShips: 3
+    ---
+    name: oneCellsShip
+    length: 1
+    width: 1
+    attackRadius: 1
+    numberOfShips: 4
 ~~~
-bonuses:			// БОНУСЫ
-	name: SmallBomb			// Название бонуса
-	type: bomb			    // Тип бонуса
-	number: 2			    // Действие бонуса
-	---
-	name: SmallTimer		// Название бонуса
-	type: timer			    // Тип бонуса
-	number: -4			    // Действие бонуса
-	---
-	name: SmallPlane		// Название бонуса
-	type: plane			    // Тип бонуса
-	number: 3			    // Действие бонуса
-~~~
+bonuses:
+    name: SmallBomb
+    type: bomb
+    number: 2
+    ---
+    name: SmallPlane
+    type: plane
+    number: 3

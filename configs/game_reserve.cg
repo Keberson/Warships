@@ -1,0 +1,40 @@
+rules:                              // ПРАВИЛА ИГРЫ
+    width: 10                       // Ширина поля
+    height: 10                      // Высота поля
+    numberOfShips: 10               // Количество кораблей
+    typeOfShips: classic            // Типы кораблей (classic - стандартный, custom - кастомизированный набор кораблей из раздела КОРАБЛИ)
+    bonuses: inactive               // Бонусы
+~~~
+ships:                          // КОРАБЛИ
+    name: fourCellsShip             // Имя корабля
+    length: 4                       // Длина корабля
+    width: 1                        // Ширина корабля
+    attackRadius: 1                 // Радиус атаки
+    numberOfShips: 1                // Количество кораблей
+    ---
+    name: threeCellsShip            // Имя корабля
+    length: 3                       // Длина корабля
+    width: 1                        // Ширина корабля
+    attackRadius: 1                 // Радиус атаки
+    numberOfShips: 2                // Количество кораблей
+    ---
+    name: twoCellsShip              // Имя корабля
+    length: 2                       // Длина корабля
+    width: 1                        // Ширина корабля
+    attackRadius: 1                 // Радиус атаки
+    numberOfShips: 3                // Количество кораблей
+    ---
+    name: oneCellsShip              // Имя корабля
+    length: 1                       // Длина корабля
+    width: 1                        // Ширина корабля
+    attackRadius: 1                 // Радиус атаки
+    numberOfShips: 4                // Количество кораблей
+~~~
+bonuses:                        // БОНУСЫ
+    name: SmallBomb                 // Название бонуса
+    type: bomb                      // Тип бонуса
+    number: 2                       // Действие бонуса
+    ---
+    name: SmallPlane                // Название бонуса
+    type: plane                     // Тип бонуса
+    number: 3                       // Действие бонуса

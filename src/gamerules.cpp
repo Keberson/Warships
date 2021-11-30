@@ -5,9 +5,11 @@ GameRules::GameRules(std::string filename) {
     parser.parse();
     std::vector<std::string> tempVector;
     tempVector = parser.getParserItem("rules", "width");
-    _widthField = (tempVector.empty() || std::stoi(tempVector[0]) <= 0) ? STANDARD_FIELD_WIDTH : std::stoi(tempVector[0]);
+    _widthField = (tempVector.empty() || std::stoi(tempVector[0]) < OPTIONS_WIDTH_MIN ||
+                std::stoi(tempVector[0]) > OPTIONS_WIDTH_MAX) ? STANDARD_FIELD_WIDTH : std::stoi(tempVector[0]);
     tempVector = parser.getParserItem("rules", "height");
-    _heightField = (tempVector.empty() || std::stoi(tempVector[0]) <= 0) ? STANDARD_FIELD_HEIGHT : std::stoi(tempVector[0]);
+    _heightField = (tempVector.empty() || std::stoi(tempVector[0]) < OPTIONS_HEIGHT_MIN ||
+                std::stoi(tempVector[0]) > OPTIONS_HEIGHT_MAX) ? STANDARD_FIELD_HEIGHT : std::stoi(tempVector[0]);
     tempVector = parser.getParserItem("rules", "numberOfShip");                                                                     // TODO(keberson): Задача для 2ой версии: если один из параметров настройки кораблей неверный, то и все параметры неверны, поэтому включаем режим Стандарт
     _numberOfShips = (tempVector.empty() || std::stoi(tempVector[0]) <= 0) ? STANDARD_NUMBER_OF_SHIPS : std::stoi(tempVector[0]);
     tempVector = parser.getParserItem("rules", "typeOfShips");

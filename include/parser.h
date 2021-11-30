@@ -4,6 +4,8 @@
 #include <string>
 #include <vector>
 
+std::string deleteSymbols(std::string str, std::string symbols);
+
 class Parser {
 private:
     std::string _filename;
