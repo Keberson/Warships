@@ -17,7 +17,7 @@ private:
     Field _field;
 public:
     User() {};
-    User(std::string name, unsigned widthField, unsigned heightField);
+    User(std::string name, unsigned widthField, unsigned heightField, std::vector<Ship> ships);
     void placeShip(unsigned id , GameRules& rules);
     bool attackEnemy(unsigned x, unsigned y, Field& enemyField);
     Field& getField() { return _field; };
@@ -30,7 +30,7 @@ class Computer;
 class Player: public User {
 public:
     Player() : User() {};
-    Player(std::string name, unsigned widthField, unsigned heightField) : User(name, widthField, heightField) {};
+    Player(std::string name, unsigned widthField, unsigned heightField, std::vector<Ship> ships) : User(name, widthField, heightField, ships) {};
     short turn(Field& enemyField, ConsoleUI& ui);
 
     friend class Computer;
@@ -39,7 +39,7 @@ public:
 class Computer: public User {
 public:
     Computer() : User() {};
-    Computer(std::string name, unsigned widthField, unsigned heightField) : User(name, widthField, heightField) {};
+    Computer(std::string name, unsigned widthField, unsigned heightField, std::vector<Ship> ships) : User(name, widthField, heightField, ships) {};
     short turn(Field& enemyField, ConsoleUI& ui);
 
     friend class Player;

@@ -9,12 +9,6 @@
 
 #define FILENAME_SAVE_OPTIONS "configs/game.cg"
 
-#define SIGNAL_MENU 1
-#define SIGNAL_START_GAME 2
-#define SIGNAL_OPTIONS 3
-#define SIGNAL_TITLES 4
-#define SIGNAL_EXIT 5
-
 std::vector<std::string> OPTIONS_DESCRIPTION {"None", "None", "None", "rules:width", "rules:height", "None", "None", "None"};
 std::vector<std::string> OPTIONS_RATIOS = {"", "", "", std::to_string(STANDARD_FIELD_WIDTH),
                                             std::to_string(STANDARD_FIELD_HEIGHT), "", "", ""};
@@ -107,22 +101,363 @@ void Game::buildGame() {
 }
 
 
-void Game::prepareToGame() {
+short Game::prepareToGame() {
     _ui.clearScreen();
 
-    _players = { Player("Player1", _rules.getWidthField(), _rules.getHeightField()) };
-    _computer = Computer("Computer", _rules.getWidthField(), _rules.getHeightField());
+    _players = { Player("Player1", _rules.getWidthField(), _rules.getHeightField(), _rules.getShips()) };
+    _computer = Computer("Computer", _rules.getWidthField(), _rules.getHeightField(), _rules.getShips());
 
-    for (int i = _rules.getNumberOfShips() - 1; i >= 0; --i) {
-        _players[0].placeShip(STANDARD_ID_START + i, _rules);
+    _ui.prepareShipSelect(_players[0].getField());
+
+    bool isAllShipsPlaced = false;
+    std::vector<Ship> allShips = _players[0].getField().getAllShips();
+    unsigned placedShips = 0;
+    unsigned notPlacedShips = allShips.size();
+    char c;
+    bool isEscape = false;
+    bool isArrows = false;
+    int currentRow = 0;
+    _ui.setShipDoRowActive(currentRow);
+    std::vector<unsigned> inactiveRows;
+
+    while (!isAllShipsPlaced) {
+        bool isSetupShip = false;
+        _ui.displayShipsSelect(_players[0].getField());
+        if (placedShips >= notPlacedShips) {
+            isAllShipsPlaced = true;
+        }
+
+        c = getchar();
+
+        if (c == 'q') {
+            return SIGNAL_MENU;
+        }
+
+        if (c == 'p') {
+            for (int i = 0; i < allShips.size(); ++i) {
+                bool isFounded = false;
+                for (auto item: inactiveRows) {
+                    if (item == i) {
+                        isFounded = true;
+                        break;
+                    }
+                }
+
+                if (!isFounded) {
+                    _players[0].placeShip(allShips[i].getId(), _rules);
+                }
+            }
+
+            isAllShipsPlaced = true;
+        }
+
+        if (c == '\033') {
+            isEscape = true;
+        }
+
+        if (isEscape && c == '[') {
+            isArrows = true;
+        }
+
+        if (isArrows) {
+            int prevRow = currentRow;
+            if (c == 'B') {
+                if (currentRow + 1 < _ui.getShipSelectSize()) {
+                    currentRow++;
+                } else {
+                    currentRow = 0;
+                }
+
+                _ui.setShipDoRowInactive(prevRow);
+                _ui.setShipDoRowActive(currentRow);
+            }
+
+            if (c == 'A') {
+                if (currentRow - 1 >= 0) {
+                    currentRow--;
+                } else {
+                    currentRow = _ui.getShipSelectSize() - 1;
+                }
+
+                _ui.setShipDoRowInactive(prevRow);
+                _ui.setShipDoRowActive(currentRow);
+            }
+        }
+
+        if (c == '\n') {
+            bool isFounded = false;
+            Field field = _players[0].getField();
+            for (auto item: inactiveRows) {
+                if (item == currentRow) {
+                    isFounded = true;
+                }
+            }
+
+            if (!isFounded) {
+                bool isSet = false;
+                bool isRotate = false;
+                unsigned height = field.getHeight();
+                unsigned width = field.getWidth();
+                Ship currentShip = allShips[currentRow];
+                unsigned shipLength = currentShip.getLength();
+                unsigned shipWidth = currentShip.getWidth();
+                std::vector<int> x;
+                std::vector<int> y;
+
+                for (int i = 0; i < shipWidth; ++i) {
+                    x.push_back(i);
+                }
+
+                for (int i = 0; i < shipLength; ++i) {
+                    y.push_back(i);
+                }
+                std::vector<Cell *> border;
+
+                std::vector<Cell> prevID;
+
+                while (!isSet) {
+                    for (auto item: prevID) {
+                        field.getCell(item.getX(), item.getY()).setID(item.getID());
+                    }
+
+                    prevID.clear();
+                    for (int i = 0; i < y.size(); ++i) {
+                        for (int j = 0; j < x.size(); ++j) {
+                            prevID.push_back(field.getCell(x[j], y[i]));
+                            field.setID(x[j], y[i], 5);
+                        }
+                    }
+
+                    _ui.displayShipsSelect(field);
+                    c = getchar();
+
+                    if (c == 'q') {
+                        isSet = true;
+                    }
+
+                    if (c == 'r') {
+                        unsigned temp = shipWidth;
+                        shipWidth = shipLength;
+                        shipLength = temp;
+                        if (!isRotate) {
+                            int xSize = x.size();
+                            if (y[0] + xSize - 1 < width) {
+                                for (int i = 1; i < xSize; ++i) {
+                                    y.push_back(y[0] + i);
+                                    x.pop_back();
+                                }
+
+                                isRotate = true;
+                            }
+                        } else {
+                            int ySize = y.size();
+                            if (x[0] + ySize - 1 < height) {
+                                for (int i = 1; i < ySize; ++i) {
+                                    x.push_back(x[0] + i);
+                                    y.pop_back();
+                                }
+
+                                isRotate = false;
+                            }
+                        }
+                    }
+
+                    if (c == '\n') {
+                        for (auto item: prevID) {
+                            field.getCell(item.getX(), item.getY()).setID(item.getID());
+                        }
+
+                        isSet = true;
+                        unsigned yPrevSize = y.size();
+                        unsigned xPrevSize = x.size();
+                        bool isTwoY = false;
+                        bool isTwoX = false;
+                        // TODO: заполнение border и установка корабля, а также проверка
+                        if (y[y.size() - 1] + 1 < field.getHeight()) {
+                            y.push_back(y[y.size() - 1] + 1);
+                        }
+
+                        if (y[0] - 1 >= 0) {
+                            y.push_back(y[0] - 1);
+                        }
+
+                        if (x[x.size() - 1] + 1 < width) {
+                            x.push_back(x[x.size() - 1] + 1);
+                        }
+
+                        if (x[0] - 1 >= 0) {
+                            x.push_back(x[0] - 1);
+                        }
+
+                        if (y.size() - yPrevSize == 2) {
+                            isTwoY = true;
+                        }
+
+                        if (x.size() - xPrevSize == 2) {
+                            isTwoX = true;
+                        }
+
+                        bool isNotCorrectCells = false;
+
+                        for (int i = 0; i < y.size(); ++i) {
+                            for (int j = 0; j < x.size(); ++j) {
+                                if (field.getCell(x[j], y[i]).getID() != 0) {
+                                    isNotCorrectCells = true;
+                                    break;
+                                }
+
+                                if (isTwoY) {
+                                    if (i == y.size() - 2) {
+                                        border.push_back(&field.getCell(x[j], y[i]));
+                                    }
+                                }
+
+                                if (isTwoX) {
+                                    if (j == x.size() - 2) {
+                                        border.push_back(&field.getCell(x[j], y[i]));
+                                    }
+                                }
+
+                                if (i == y.size() - 1 || j == x.size() - 1) {
+                                    border.push_back(&field.getCell(x[j], y[i]));
+                                }
+                            }
+
+                            if (isNotCorrectCells) {
+                                border.clear();
+                                isSet = false;
+                                break;
+                            }
+                        }
+
+                        y.pop_back();
+                        if (isTwoY) {
+                            y.pop_back();
+                        }
+
+                        x.pop_back();
+                        if (isTwoX) {
+                            x.pop_back();
+                        }
+
+                        if (!isNotCorrectCells) {
+                            for (int i = 0; i < y.size(); ++i) {
+                                for (int j = 0; j < x.size(); ++j) {
+                                    _players[0].getField().setID(x[j], y[i], currentShip.getId());
+                                }
+                            }
+
+                            field.addShipBorder(currentShip.getId(), border);
+                            isSetupShip = true;
+                        }
+                    }
+
+                    if (c == '\033') {
+                        isEscape = true;
+                    }
+
+                    if (isEscape && c == '[') {
+                        isArrows = true;
+                    }
+
+                    if (isArrows) {
+                        if (c == 'B') {
+                            if (x[0] + shipWidth < width) {
+                                for (int i = 0; i < x.size(); ++i) {
+                                    x[i]++;
+                                }
+                            } else {
+                                for (int i = 0; i < x.size(); ++i) {
+                                    x[i] = i;
+                                }
+                            }
+                        }
+
+                        if (c == 'A') {
+                            if (x[0] - 1 >= 0) {
+                                for (int i = 0; i < x.size(); ++i) {
+                                    x[i]--;
+                                }
+                            } else {
+                                for (int i = 0; i < x.size(); ++i) {
+                                    x[i] = (int)width - (int)shipWidth + i;
+                                }
+                            }
+                        }
+
+                        if (c == 'C') {
+                            if (y[0] + shipLength < height) {
+                                for (int i = 0; i < y.size(); ++i) {
+                                    y[i]++;
+                                }
+                            } else {
+                                for (int i = 0; i < y.size(); ++i) {
+                                    y[i] = i;
+                                }
+                            }
+                        }
+
+                        if (c == 'D') {
+                            if (y[0] - 1 >= 0) {
+                                for (int i = 0; i < y.size(); ++i) {
+                                    y[i]--;
+                                }
+                            } else {
+                                for (int i = 0; i < y.size(); ++i) {
+                                    y[i] = (int)height - (int)shipLength + i;
+                                }
+                            }
+                        }
+                    }
+                }
+
+                isEscape = false;
+                isArrows = false;
+            }
+
+            if (isSetupShip) {
+                _ui.setShipDoRowFilled(currentRow);
+                _ui.setShipDoRowInactive(currentRow);
+                inactiveRows.push_back(currentRow);
+                if (inactiveRows.size() == _ui.getShipSelectSize()) {
+                    isAllShipsPlaced = true;
+                } else {
+                    bool isFounded = false;
+                    while (!isFounded) {
+                        bool isIn = false;
+                        for (auto item: inactiveRows) {
+                            if (item == currentRow) {
+                                isIn = true;
+                                break;
+                            }
+                        }
+
+                        if (!isIn) {
+                            isFounded = true;
+                            break;
+                        }
+
+                        if (currentRow + 1 < _ui.getShipSelectSize()) {
+                            currentRow++;
+                        } else {
+                            currentRow = 0;
+                        }
+                    }
+
+                    _ui.setShipDoRowActive(currentRow);
+                }
+            }
+        }
     }
 
     for (int i = _rules.getNumberOfShips() - 1; i >= 0; --i) {
         _computer.placeShip(STANDARD_ID_START + i, _rules);
     }
 
-    _rules.setWidthField(10);
+    _rules.setWidthField(10);           // TODO(keberson): пока без кастомных правил, добавить позже
     _rules.setHeightField(10);
+
+    return SIGNAL_START_GAME;
 }
 
 short Game::startGame() {
@@ -175,10 +510,13 @@ short Game::startGame() {
                 break;
             }
         }
-        // /For ConsoleUI
     }
 
-    std::cout << std::endl << "Congratulations! " << winner << " is winner!" << std::endl;
+    _ui.clearScreen();
+    std::string winStr;
+    winStr += "Congratulations! " + winner + " is winner!";
+    _ui.setCursor(_ui.romax() / 2, _ui.comax() / 2 - winStr.length() / 2);
+    std::cout << std::endl << winStr << std::endl;
     sleep(5);
     return SIGNAL_MENU;
 }
@@ -241,7 +579,7 @@ short Game::openMenu() {
     rowCounter -= _ui.getMenuStartIndex();
     switch (rowCounter) {
         case 0:
-            return SIGNAL_START_GAME;
+            return SIGNAL_PREPARE_TO_GAME;
         case 1:
             return SIGNAL_OPTIONS;
         case 2:
@@ -371,7 +709,7 @@ short Game::openTitles() {
     return SIGNAL_MENU;
 }
 
-void Game::loadFromFile() {   // TODO(keberson): не робит, починит
+void Game::loadFromFile() {
     OPTIONS_RATIOS[3] = "10";//std::to_string(_rules.getWidthField());
     OPTIONS_RATIOS[4] = "10";std::to_string(_rules.getHeightField());
 }
@@ -386,8 +724,10 @@ void Game::launcher() {
             case SIGNAL_MENU:
                 chapter = openMenu();
                 break;
+            case SIGNAL_PREPARE_TO_GAME:
+                chapter = prepareToGame();
+                break;
             case SIGNAL_START_GAME:
-                prepareToGame();
                 chapter = startGame();
                 break;
             case SIGNAL_OPTIONS:

@@ -19,7 +19,7 @@ private:
 
     short openMenu();
     void buildGame();
-    void prepareToGame();
+    short prepareToGame();
     short startGame();
     short openOptions();
     short openTitles();

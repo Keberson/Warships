@@ -21,6 +21,7 @@ add_executable(warships
         src/game.cpp
         src/gamerules.cpp
         src/parser.cpp
+        src/ship.cpp
         src/user.cpp
         src/ui.cpp
         src/main.cpp)

@@ -34,16 +34,23 @@ public:
     void synchronizeOptionsRatio(std::vector<std::string>& ratios);
     void setOptionsRatio(unsigned row, std::string str);
     // Game
+    void prepareShipSelect(Field& field);
+    void displayShipsSelect(Field& field);
+    unsigned getShipSelectSize();
+    void setShipDoRowActive(unsigned row);
+    void setShipDoRowInactive(unsigned row);
+    void setShipDoRowFilled(unsigned row);
     void displayFields(Field& leftField, Field& rightField);
     void displayTheField(Field& field, unsigned offset, bool isHide);
     void clearScreen();
     void setInputMode();
     void setBackground();
     void setSeaCell();
-    void setShippCell();
+    void setShipCell();
     void setDestroyedShip();
     void setMissCell();
     void setActiveCell();
+    void setSelectShip();
     void setCursor(unsigned x, unsigned y);
     void turnOffCursor();
     unsigned comax();

@@ -1,4 +1,5 @@
 #include <ctime>
+#include <fstream>
 #include <sstream>
 
 #include "gamerules.h"
@@ -8,13 +9,13 @@
 unsigned prevX = 0;
 unsigned prevY = 0;
 
-User::User(std::string name, unsigned widthField, unsigned heightField) {
+User::User(std::string name, unsigned widthField, unsigned heightField, std::vector<Ship> ships) {
     _name = name;
-    _field = Field(widthField, heightField);
+    _field = Field(widthField, heightField, ships);
 }
 
+// Set random position
 void User::placeShip(unsigned id , GameRules& rules) {
-    // TODO(keberson): Задание для 2ой версии: установка кораблей на игровое поле либо рандом, либо считывая с консоли (сделать)
     prevX = 0;
     prevY = 0;
     Ship* currentShip = rules.getShip(id);
@@ -24,6 +25,7 @@ void User::placeShip(unsigned id , GameRules& rules) {
     int currentLength = currentShip->getLength();
     bool isRotateAxises;
     bool isCorrectCell = false;
+    std::vector<Cell*> border;
     while (!isCorrectCell) {
         randomX = rand() % rules.getWidthField();
         randomY = rand() % rules.getHeightField();
@@ -48,9 +50,17 @@ void User::placeShip(unsigned id , GameRules& rules) {
                             isFindCells = false;
                             break;
                         }
+
+                       if (offsetY == -1 || offsetY == currentWidth) {
+                           border.push_back(&_field.getCell(randomX + offsetX, randomY + offsetY));
+                       } else if ((offsetX == -1 || offsetX == currentLength)) {
+                           border.push_back(&_field.getCell(randomX + offsetX, randomY + offsetY));
+                       }
+
                     }
 
                     if (!isFindCells) {
+                        border.clear();
                         break;
                     }
                 }
@@ -68,6 +78,8 @@ void User::placeShip(unsigned id , GameRules& rules) {
             _field.setID(randomX + offsetX, randomY + offsetY, id);
         }
     }
+
+    _field.addShipBorder(id, border);
 }
 
 bool User::attackEnemy(unsigned x, unsigned y, Field& enemyField) {
@@ -86,13 +98,14 @@ bool User::attackEnemy(unsigned x, unsigned y, Field& enemyField) {
     }
 
     if (isInShip) {
+        enemyField.getShip(id)->attackShip(1);
+        enemyField.setNumberOfHits(1);
         enemyField.setID(x, y, id + ID_SHIPS_OFFSET);
         return true;
     }
 
     return false;
 }
-
 
 short Player::turn(Field& enemyField, ConsoleUI& ui) {
     int x = prevX;
@@ -195,149 +208,21 @@ short Player::turn(Field& enemyField, ConsoleUI& ui) {
     ui.setCursor(24, 1);
     std::cout << "\033[2K";
 
+    unsigned prevCellID = enemyField.getCell(x, y).getID();
+
     if (attackEnemy(x, y, enemyField)) {
         prevX = x;
         prevY = y;
-        bool isHaveShip = false;
-        if (x + 1 < enemyField.getWidth()) {
-            cellID = enemyField.getCell(x + 1, y).getID();
-            bool isInShip = false;
-            for (int i = 1; i <= ID_SHIPS_OFFSET / 10; ++i) {
-                if (cellID / 10 == i) {
-                    isInShip = true;
-                    break;
-                }
+
+        if (enemyField.getShip(prevCellID)->getHP() > 0) {
+            std::cout << "\033[31m" << "Hit!" << "\033[37m" << std::endl;
+        } else {
+            std::vector<Cell*> border = enemyField.getBorderCells(prevCellID);
+
+            for (auto item: border) {
+                item->setID(1);
             }
 
-            if (isInShip) {
-                std::cout << "\033[31m" << "Hit!" << "\033[37m" << std::endl;
-                isHaveShip = true;
-            }
-        }
-
-        if (!isHaveShip && (x - 1 < enemyField.getWidth())) {
-            cellID = enemyField.getCell(x - 1, y).getID();
-            bool isInShip = false;
-            for (int i = 1; i <= ID_SHIPS_OFFSET / 10; ++i) {
-                if (cellID / 10 == i) {
-                    isInShip = true;
-                    break;
-                }
-            }
-
-            if (isInShip) {
-                std::cout << "\033[31m" << "Hit!" << "\033[37m" << std::endl;
-                isHaveShip = true;
-            }
-        }
-
-        if (!isHaveShip && (y + 1 < enemyField.getWidth())) {
-            cellID = enemyField.getCell(x, y + 1).getID();
-            bool isInShip = false;
-            for (int i = 1; i <= ID_SHIPS_OFFSET / 10; ++i) {
-                if (cellID / 10 == i) {
-                    isInShip = true;
-                    break;
-                }
-            }
-
-            if (isInShip) {
-                std::cout << "\033[31m" << "Hit!" << "\033[37m" << std::endl;
-                isHaveShip = true;
-            }
-        }
-
-        if (!isHaveShip && (y - 1 < enemyField.getWidth())) {
-            cellID = enemyField.getCell(x, y - 1).getID();
-            bool isInShip = false;
-            for (int i = 1; i <= ID_SHIPS_OFFSET / 10; ++i) {
-                if (cellID / 10 == i) {
-                    isInShip = true;
-                    break;
-                }
-            }
-
-            if (isInShip) {
-                std::cout << "\033[31m" << "Hit!" << "\033[37m" << std::endl;
-                isHaveShip = true;
-            }
-        }
-
-        if (!isHaveShip) {
-            // TODO(keberson): Задание для 2ой версии: обводка всех полей вокруг корабля
-            // Только для кораблей в ширину 1. Переделать!!!
-            /*int directionX = 0;
-            int directionY = 0;
-            bool isNotEdgeX = false;
-            bool isNotEdgeY = false;
-            bool isOneCellShip = false;
-
-            if (x + 1 < enemyField.getHeight()) {
-                cellID = enemyField.getCell(x + 1, y).getID();
-                for (int i = 1; i <= ID_SHIPS_OFFSET / 10; ++i) {
-                    if (cellID / 10 == i) {
-                        directionX++;
-                        break;
-                    }
-                }
-            }
-
-            if (x - 1 >= 0) {
-                cellID = enemyField.getCell(x - 1, y).getID();
-                for (int i = 1; i <= ID_SHIPS_OFFSET / 10; ++i) {
-                    if (cellID / 10 == i) {
-                        directionX++;
-                        break;
-                    }
-                }
-            }
-
-            if (y + 1 < enemyField.getWidth()) {
-                cellID = enemyField.getCell(x, y + 1).getID();
-                for (int i = 1; i <= ID_SHIPS_OFFSET / 10; ++i) {
-                    if (cellID / 10 == i) {
-                        directionY++;
-                        break;
-                    }
-                }
-            }
-
-            if (y - 1 >= 0) {
-                cellID = enemyField.getCell(x, y - 1).getID();
-                for (int i = 1; i <= ID_SHIPS_OFFSET / 10; ++i) {
-                    if (cellID / 10 == i) {
-                        directionY++;
-                        break;
-                    }
-                }
-            }
-
-            if (directionX == 0 && directionY == 0) {
-                isOneCellShip = true;
-            }
-
-            if (directionX == 2) {
-                isNotEdgeX = true;
-            }
-
-            if (directionY == 2) {
-                isNotEdgeY = true;
-            }
-
-            if (isOneCellShip) {
-                for (int i = -1; i <= 1; ++i) {
-                    for (int j = -1; j <= 1; ++j) {
-                        if (i != 0 || j != 0) {
-                            if (x + i >= 0 && x + i < enemyField.getHeight() && y + j >= 0 &&
-                                y + j < enemyField.getWidth()) {
-                                enemyField.setID(x + i, y + j, 1);
-                            }
-                        }
-                    }
-                }
-            }
-
-            if (isNotEdgeX) */
             std::cout << "\033[31m" << "Destroyed!" << "\033[37m" << std::endl;
         }
 
@@ -372,5 +257,82 @@ short Computer::turn(Field& enemyField, ConsoleUI& ui) {
         }
     }
 
-    return attackEnemy(randomX, randomY, enemyField);
+    unsigned prevCellID = enemyField.getCell(randomX, randomY).getID();
+    if (attackEnemy(randomX, randomY, enemyField)) {
+        unsigned cellID;
+        bool isHaveShip = false;
+        if (randomX + 1 < enemyField.getWidth()) {
+            cellID = enemyField.getCell(randomX + 1, randomY).getID();
+            bool isInShip = false;
+            for (int i = 1; i <= ID_SHIPS_OFFSET / 10; ++i) {
+                if (cellID / 10 == i) {
+                    isInShip = true;
+                    break;
+                }
+            }
+
+            if (isInShip) {
+                isHaveShip = true;
+            }
+        }
+
+        if (!isHaveShip && (randomX - 1 < enemyField.getWidth())) {
+            cellID = enemyField.getCell(randomX - 1, randomY).getID();
+            bool isInShip = false;
+            for (int i = 1; i <= ID_SHIPS_OFFSET / 10; ++i) {
+                if (cellID / 10 == i) {
+                    isInShip = true;
+                    break;
+                }
+            }
+
+            if (isInShip) {
+                isHaveShip = true;
+            }
+        }
+
+        if (!isHaveShip && (randomY + 1 < enemyField.getWidth())) {
+            cellID = enemyField.getCell(randomX, randomY + 1).getID();
+            bool isInShip = false;
+            for (int i = 1; i <= ID_SHIPS_OFFSET / 10; ++i) {
+                if (cellID / 10 == i) {
+                    isInShip = true;
+                    break;
+                }
+            }
+
+            if (isInShip) {
+                isHaveShip = true;
+            }
+        }
+
+        if (!isHaveShip && (randomY - 1 < enemyField.getWidth())) {
+            cellID = enemyField.getCell(randomX, randomY - 1).getID();
+            bool isInShip = false;
+            for (int i = 1; i <= ID_SHIPS_OFFSET / 10; ++i) {
+                if (cellID / 10 == i) {
+                    isInShip = true;
+                    break;
+                }
+            }
+
+            if (isInShip) {
+                isHaveShip = true;
+            }
+        }
+
+        if (!isHaveShip) {
+            std::vector<Cell *> border = enemyField.getBorderCells(prevCellID);
+
+            for (auto item: border) {
+                item->setID(1);
+            }
+
+            std::cout << "\033[31m" << "Destroyed!" << "\033[37m" << std::endl;
+        }
+
+        return true;
+    }
+
+    return false;
 }

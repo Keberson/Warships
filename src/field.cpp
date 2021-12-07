@@ -1,10 +1,11 @@
 #include "field.h"
 #include "standards.h"
 
-Field::Field(unsigned width, unsigned height) {
+Field::Field(unsigned width, unsigned height, std::vector<Ship> ships) {
     _numberOfHits = 0;
     _width = width;
     _height = height;
+    _ships = ships;
     for (unsigned i = 0; i < width; ++i) {
         for (unsigned j = 0; j < height; ++j) {
             _cells.emplace_back(i, j, 0);
@@ -14,10 +15,18 @@ Field::Field(unsigned width, unsigned height) {
 
 void Field::setID(unsigned x, unsigned y, unsigned id) {
     _cells[x * _width + y].setID(id);
-    if (id >= STANDARD_ID_START + ID_SHIPS_OFFSET) {
-        _numberOfHits++;
-    }
 }
+
+Ship* Field::getShip(unsigned int id) {
+    for (unsigned i = 0; i < _ships.size(); ++i) {
+        if (_ships[i].getId() == id) {
+            return &_ships[i];
+        }
+    }
+
+    return nullptr;
+}
+
 
 std::ostream& operator << (std::ostream& out, Field& field) {       // Helper method
     out.width(3);
@@ -42,4 +51,8 @@ std::ostream& operator << (std::ostream& out, Field& field) {       // Helper me
 
     out << std::endl;
     return out;
+}
+
+void Field::addShipBorder(unsigned int id, std::vector<Cell*> cells) {
+    _shipsBorders[id] = cells;
 }

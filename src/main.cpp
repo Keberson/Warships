@@ -4,7 +4,7 @@
 #include "game.h"
 
 int main(int argc, char* argv[]) {
-    srand(7);//time(nullptr));
+    srand(time(nullptr));
     Game game(STANDARD_CONFIG_PATH);
     game.launcher();
 

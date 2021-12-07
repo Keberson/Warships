@@ -31,7 +31,7 @@ GameRules::GameRules(std::string filename) {
             }
 
             Ship temp_ship(idCounter++, STANDARD_SHIPS_NAME[shipSwitch], STANDARD_SHIPS_WIDTH[shipSwitch],
-                           STANDARD_SHIPS_HEIGHT[shipSwitch], STANDARD_SHIPS_ATTACK_RADIUS[shipSwitch]);
+                           STANDARD_SHIPS_HEIGHT[shipSwitch]);
             bool isEnd = true;
             unsigned counter = 0;
             for (auto item: _ships) {
@@ -59,7 +59,6 @@ GameRules::GameRules(std::string filename) {
                         STANDARD_BONUSES : (tempVector[0] == "active");
     /*if (_isActiveBonuses) {
          tempVector = parser.getParserItem("rules", "isActiveBonuses");
-        TODO(keberson): Задача для 2ой версии: сделать заполнение вектора _bonuses бонусами
     }*/
 }
 

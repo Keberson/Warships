@@ -23,9 +23,15 @@ const unsigned STANDARD_ID_START = 10;
 const std::string STANDARD_SHIPS_NAME[] = { "OneCellShip", "TwoCellShip", "ThreeCellShip", "FourCellShip" };
 const unsigned STANDARD_SHIPS_WIDTH[] = { 1, 2, 3, 4 };
 const unsigned STANDARD_SHIPS_HEIGHT[] = { 1, 1, 1, 1};
-const unsigned STANDARD_SHIPS_ATTACK_RADIUS[] = { 1, 1, 1, 1 };
 const unsigned STANDARD_SHIPS_NUMBER[] = { 4, 3, 2, 1 };
 
 static unsigned ID_SHIPS_OFFSET = 10;
+
+#define SIGNAL_MENU 1
+#define SIGNAL_PREPARE_TO_GAME 2
+#define SIGNAL_START_GAME 3
+#define SIGNAL_OPTIONS 4
+#define SIGNAL_TITLES 5
+#define SIGNAL_EXIT 6
 
 #endif // WARSHIPS_STANDARDS_H
