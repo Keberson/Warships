@@ -219,7 +219,7 @@ short Player::turn(Field& enemyField, ConsoleUI& ui) {
                 }
             }
 
-            if (isInShip || cellID == EMPTY_CELL_ID) {
+            if (isInShip || cellID == EMPTY_CELL_ID || cellID == ISLAND_ID) {
                 isEnterPressed = true;
                 enemyField.getCell(x, y).setID(cellID);
             } else {
