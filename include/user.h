@@ -18,7 +18,8 @@ private:
 public:
     User() {};
     User(std::string name, unsigned widthField, unsigned heightField, std::vector<Ship> ships);
-    void placeShip(unsigned id , GameRules& rules);
+    void randomPlaceShip(unsigned id);
+    void randomPlaceIsland(unsigned number);
     bool attackEnemy(unsigned x, unsigned y, Field& enemyField);
     Field& getField() { return _field; };
     virtual short turn(Field& enemyField, ConsoleUI& ui) = 0;

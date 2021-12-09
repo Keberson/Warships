@@ -5,6 +5,7 @@
 #include <termios.h>
 #include <unistd.h>
 
+#include "standards.h"
 #include "ui.h"
 
 #define TITLES_DELAY 300000
@@ -25,7 +26,7 @@ std::vector<std::string> TITLES = { "The idea was invented by Kozov A.V.",
                                     "The code was written by Kuzov M.Y. and Mandzhiev D.Kh.",
                                     "The logic of the game was written by Kuzov M.Y.",
                                     "The interface was written by Mandzhiev D.Kh.",
-                                    "Pavlov P.S. and Kolotilin V.S. helped in testing."};
+                                    "Pavlov P.S., Sham D.A. and Kolotilin V.S. helped in testing."};
 // Two last strings always are not interactive
 std::vector<std::string> MENU_RAW = {"", "Menu", "", "Start game", "Options", "Titles", "Exit", ""};
 std::vector<std::string> OPTIONS_RAW = {"", "Options", "", "Width: ", "Height: ", "Exit", ""};
@@ -443,8 +444,16 @@ void ConsoleUI::displayTheField(Field& field, unsigned offset, bool isHide) {
                 if (j % (widthCell + 1) == 0) {
                     setBackground();
                     columnCounter++;
-                } else if (field.getCell(rowCounter - 1, columnCounter).getID() == 0) {
+                } else if (field.getCell(rowCounter - 1, columnCounter).getID() == EMPTY_CELL_ID) {
                     setSeaCell();
+                } else if (field.getCell(rowCounter - 1, columnCounter).getID() == ISLAND_ID_ATTACKED) {
+                    setIslandCell();
+                } else if (field.getCell(rowCounter - 1, columnCounter).getID() == ISLAND_ID) {
+                    if (isHide) {
+                        setSeaCell();
+                    } else {
+                        setIslandCell();
+                    }
                 } else if (field.getCell(rowCounter - 1, columnCounter).getID() / 10 == 1) {
                     if (isHide) {
                         setSeaCell();
@@ -474,6 +483,13 @@ void ConsoleUI::displayTheField(Field& field, unsigned offset, bool isHide) {
 
 
 void ConsoleUI::clearScreen() {
+    for (unsigned i = 1; i <= romax(); ++i) {
+        for (unsigned j = 1; j <= comax(); ++j) {
+            setCursor(i, j);
+            setBackground();
+        }
+    }
+
     std::cout << "\033[2J";
 }
 
@@ -503,11 +519,11 @@ void ConsoleUI::setShipCell() {
 }
 
 void ConsoleUI::setDestroyedShip() {
-    std::cout << "\033[41m ";
+    std::cout << "\033[101m ";
 }
 
 void ConsoleUI::setMissCell() {
-    std::cout << "\033[106m ";
+    std::cout << "\033[104m ";      // \033[106m
 }
 
 void ConsoleUI::setActiveCell() {
@@ -516,6 +532,10 @@ void ConsoleUI::setActiveCell() {
 
 void ConsoleUI::setSelectShip() {
     std::cout << "\033[106m ";
+}
+
+void ConsoleUI::setIslandCell() {
+    std::cout << "\033[43m ";
 }
 
 void ConsoleUI::setCursor(unsigned x, unsigned y) {

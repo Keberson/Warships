@@ -51,6 +51,7 @@ public:
     void setMissCell();
     void setActiveCell();
     void setSelectShip();
+    void setIslandCell();
     void setCursor(unsigned x, unsigned y);
     void turnOffCursor();
     unsigned comax();

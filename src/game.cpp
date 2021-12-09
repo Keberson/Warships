@@ -120,6 +120,7 @@ short Game::prepareToGame() {
     _ui.setShipDoRowActive(currentRow);
     std::vector<unsigned> inactiveRows;
 
+    _players[0].randomPlaceIsland(_players[0].getField().getWidth() * _players[0].getField().getHeight() / ISLAND_SQUARE - rand() % 10);
     while (!isAllShipsPlaced) {
         bool isSetupShip = false;
         _ui.displayShipsSelect(_players[0].getField());
@@ -144,7 +145,7 @@ short Game::prepareToGame() {
                 }
 
                 if (!isFounded) {
-                    _players[0].placeShip(allShips[i].getId(), _rules);
+                    _players[0].randomPlaceShip(allShips[i].getId());
                 }
             }
 
@@ -211,8 +212,8 @@ short Game::prepareToGame() {
                 for (int i = 0; i < shipLength; ++i) {
                     y.push_back(i);
                 }
-                std::vector<Cell *> border;
 
+                std::vector<Cell*> border;
                 std::vector<Cell> prevID;
 
                 while (!isSet) {
@@ -272,7 +273,7 @@ short Game::prepareToGame() {
                         unsigned xPrevSize = x.size();
                         bool isTwoY = false;
                         bool isTwoX = false;
-                        // TODO: заполнение border и установка корабля, а также проверка
+
                         if (y[y.size() - 1] + 1 < field.getHeight()) {
                             y.push_back(y[y.size() - 1] + 1);
                         }
@@ -301,25 +302,50 @@ short Game::prepareToGame() {
 
                         for (int i = 0; i < y.size(); ++i) {
                             for (int j = 0; j < x.size(); ++j) {
-                                if (field.getCell(x[j], y[i]).getID() != 0) {
+                                if (field.getCell(x[j], y[i]).getID() / 10 == 1) {
                                     isNotCorrectCells = true;
                                     break;
                                 }
 
                                 if (isTwoY) {
                                     if (i == y.size() - 2) {
-                                        border.push_back(&field.getCell(x[j], y[i]));
+                                        if (field.getCell(x[j], y[i]).getID() != ISLAND_ID) {
+                                            border.push_back(&field.getCell(x[j], y[i]));
+                                        }
+
+                                        continue;
+                                    } else if (i != y.size() - 1 && j != x.size() - 1 && j != y.size() - 2) {
+                                        if (field.getCell(x[j], y[i]).getID() == ISLAND_ID) {
+                                            isNotCorrectCells = true;
+                                            break;
+                                        }
                                     }
                                 }
 
                                 if (isTwoX) {
                                     if (j == x.size() - 2) {
-                                        border.push_back(&field.getCell(x[j], y[i]));
+                                        if (field.getCell(x[j], y[i]).getID() != ISLAND_ID) {
+                                            border.push_back(&field.getCell(x[j], y[i]));
+                                        }
+
+                                        continue;
+                                    } else if (j != x.size() - 1 && i != y.size() - 1 && i != x.size() - 2) {
+                                        if (field.getCell(x[j], y[i]).getID() == ISLAND_ID) {
+                                            isNotCorrectCells = true;
+                                            break;
+                                        }
                                     }
                                 }
 
                                 if (i == y.size() - 1 || j == x.size() - 1) {
-                                    border.push_back(&field.getCell(x[j], y[i]));
+                                    if (field.getCell(x[j], y[i]).getID() != ISLAND_ID) {
+                                        border.push_back(&field.getCell(x[j], y[i]));
+                                    }
+                                } else {
+                                    if (field.getCell(x[j], y[i]).getID() == ISLAND_ID) {
+                                        isNotCorrectCells = true;
+                                        break;
+                                    }
                                 }
                             }
 
@@ -450,8 +476,9 @@ short Game::prepareToGame() {
         }
     }
 
+    _computer.randomPlaceIsland(_players[0].getField().getWidth() * _players[0].getField().getHeight() / ISLAND_SQUARE - rand() % 10);
     for (int i = _rules.getNumberOfShips() - 1; i >= 0; --i) {
-        _computer.placeShip(STANDARD_ID_START + i, _rules);
+        _computer.randomPlaceShip(STANDARD_ID_START + i);
     }
 
     _rules.setWidthField(10);           // TODO(keberson): пока без кастомных правил, добавить позже
@@ -467,7 +494,6 @@ short Game::startGame() {
     _ui.clearScreen();
 
     while (!isGameEnd) {
-        // TODO(keberson): Задача для 3ий версии: реализация для случая, если 2 игрока
         // For ConsoleUI
         _ui.displayFields(_players[0].getField(), _computer.getField());
 
@@ -528,8 +554,6 @@ short Game::openMenu() {
     bool isEscape = false;
     bool isArrows = false;
     char c;
-
-    _ui.clearScreen();
 
     while (!isSelected) {
         _ui.menuDoRowActive("menu", rowCounter);
@@ -720,6 +744,7 @@ void Game::launcher() {
     signal(SIGINT, emergencyInterruption);
 
     while (!isExit) {
+        _ui.clearScreen();
         switch (chapter) {
             case SIGNAL_MENU:
                 chapter = openMenu();

@@ -6,6 +6,11 @@
 const std::string STANDARD_CONFIG_PATH = "configs/game.cg";
 const unsigned STANDARD_ID_START = 10;
 
+#define EMPTY_CELL_ID 0
+#define ISLAND_ID_ATTACKED 8
+#define ISLAND_ID 9
+#define ISLAND_SQUARE 10
+
 // chapter "rules"
 #define STANDARD_FIELD_WIDTH 10
 #define STANDARD_FIELD_HEIGHT 10

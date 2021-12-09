@@ -14,11 +14,10 @@ User::User(std::string name, unsigned widthField, unsigned heightField, std::vec
     _field = Field(widthField, heightField, ships);
 }
 
-// Set random position
-void User::placeShip(unsigned id , GameRules& rules) {
+void User::randomPlaceShip(unsigned id) {
     prevX = 0;
     prevY = 0;
-    Ship* currentShip = rules.getShip(id);
+    Ship* currentShip = _field.getShip(id);
     int randomX;
     int randomY;
     int currentWidth = currentShip->getWidth();
@@ -27,36 +26,42 @@ void User::placeShip(unsigned id , GameRules& rules) {
     bool isCorrectCell = false;
     std::vector<Cell*> border;
     while (!isCorrectCell) {
-        randomX = rand() % rules.getWidthField();
-        randomY = rand() % rules.getHeightField();
-        isRotateAxises = rand() % 2 == 1;
+        randomX = rand() % _field.getWidth();
+        randomY = rand() % _field.getHeight();
+        isRotateAxises = rand() % 3 != 0;
         if (isRotateAxises) {
             currentWidth = currentShip->getLength();
             currentLength = currentShip->getWidth();
         }
 
-        if (_field.getCell(randomX, randomY).getID() == 0) {
-            if ((randomX + currentLength <= rules.getWidthField() - 1) &&
-                (randomY + currentWidth <= rules.getHeightField() - 1)) {
+        if (_field.getCell(randomX, randomY).getID() == EMPTY_CELL_ID) {
+            if ((randomX + currentLength <= _field.getWidth() - 1) &&
+                (randomY + currentWidth <= _field.getHeight() - 1)) {
                 bool isFindCells = true;
                 for (int offsetY = -1; offsetY <= currentWidth; ++offsetY) {
                     for (int offsetX = -1; offsetX <= currentLength; ++offsetX) {
-                        if (randomX + offsetX > rules.getWidthField() - 1 || randomX + offsetX < 0 ||
-                            randomY + offsetY > rules.getHeightField() - 1 || randomY + offsetY < 0) {
+                        if (randomX + offsetX > _field.getWidth() - 1 || randomX + offsetX < 0 ||
+                            randomY + offsetY > _field.getHeight() - 1 || randomY + offsetY < 0) {
                             continue;
                         }
 
-                       if (_field.getCell(randomX + offsetX, randomY + offsetY).getID() != 0) {
+                       if (_field.getCell(randomX + offsetX, randomY + offsetY).getID() / 10 == 1) {
                             isFindCells = false;
                             break;
                         }
 
                        if (offsetY == -1 || offsetY == currentWidth) {
-                           border.push_back(&_field.getCell(randomX + offsetX, randomY + offsetY));
-                       } else if ((offsetX == -1 || offsetX == currentLength)) {
-                           border.push_back(&_field.getCell(randomX + offsetX, randomY + offsetY));
+                           if (_field.getCell(randomX + offsetX, randomY + offsetY).getID() != ISLAND_ID) {
+                               border.push_back(&_field.getCell(randomX + offsetX, randomY + offsetY));
+                           }
+                       } else if (offsetX == -1 || offsetX == currentLength) {
+                           if (_field.getCell(randomX + offsetX, randomY + offsetY).getID() != ISLAND_ID) {
+                               border.push_back(&_field.getCell(randomX + offsetX, randomY + offsetY));
+                           }
+                       } else if (_field.getCell(randomX + offsetX, randomY + offsetY).getID() == ISLAND_ID) {
+                           isFindCells = false;
+                           break;
                        }
-
                     }
 
                     if (!isFindCells) {
@@ -82,10 +87,30 @@ void User::placeShip(unsigned id , GameRules& rules) {
     _field.addShipBorder(id, border);
 }
 
+void User::randomPlaceIsland(unsigned number) {
+    for (int i = 0; i < number; ++i) {
+        bool isCorrectCell = false;
+        while (!isCorrectCell) {
+            unsigned randomX = rand() % _field.getWidth();
+            unsigned randomY = rand() % _field.getHeight();
+
+            if (_field.getCell(randomX, randomY).getID() == EMPTY_CELL_ID) {
+                _field.setID(randomX, randomY, ISLAND_ID);
+                isCorrectCell = true;
+            }
+        }
+    }
+}
+
 bool User::attackEnemy(unsigned x, unsigned y, Field& enemyField) {
     unsigned id = enemyField.getCell(x, y).getID();
-    if (id == 0) {
+    if (id == EMPTY_CELL_ID) {
         enemyField.setID(x, y, 1);
+        return false;
+    }
+
+    if (id == ISLAND_ID) {
+        enemyField.setID(x, y, ISLAND_ID_ATTACKED);
         return false;
     }
 
@@ -194,7 +219,7 @@ short Player::turn(Field& enemyField, ConsoleUI& ui) {
                 }
             }
 
-            if (isInShip || cellID == 0) {
+            if (isInShip || cellID == EMPTY_CELL_ID) {
                 isEnterPressed = true;
                 enemyField.getCell(x, y).setID(cellID);
             } else {
@@ -252,77 +277,15 @@ short Computer::turn(Field& enemyField, ConsoleUI& ui) {
             }
         }
 
-        if (cellId == 0 || isInShip) {
+        if (cellId == EMPTY_CELL_ID || isInShip) {
             isCorrectCell = true;
         }
     }
 
     unsigned prevCellID = enemyField.getCell(randomX, randomY).getID();
     if (attackEnemy(randomX, randomY, enemyField)) {
-        unsigned cellID;
-        bool isHaveShip = false;
-        if (randomX + 1 < enemyField.getWidth()) {
-            cellID = enemyField.getCell(randomX + 1, randomY).getID();
-            bool isInShip = false;
-            for (int i = 1; i <= ID_SHIPS_OFFSET / 10; ++i) {
-                if (cellID / 10 == i) {
-                    isInShip = true;
-                    break;
-                }
-            }
-
-            if (isInShip) {
-                isHaveShip = true;
-            }
-        }
-
-        if (!isHaveShip && (randomX - 1 < enemyField.getWidth())) {
-            cellID = enemyField.getCell(randomX - 1, randomY).getID();
-            bool isInShip = false;
-            for (int i = 1; i <= ID_SHIPS_OFFSET / 10; ++i) {
-                if (cellID / 10 == i) {
-                    isInShip = true;
-                    break;
-                }
-            }
-
-            if (isInShip) {
-                isHaveShip = true;
-            }
-        }
-
-        if (!isHaveShip && (randomY + 1 < enemyField.getWidth())) {
-            cellID = enemyField.getCell(randomX, randomY + 1).getID();
-            bool isInShip = false;
-            for (int i = 1; i <= ID_SHIPS_OFFSET / 10; ++i) {
-                if (cellID / 10 == i) {
-                    isInShip = true;
-                    break;
-                }
-            }
-
-            if (isInShip) {
-                isHaveShip = true;
-            }
-        }
-
-        if (!isHaveShip && (randomY - 1 < enemyField.getWidth())) {
-            cellID = enemyField.getCell(randomX, randomY - 1).getID();
-            bool isInShip = false;
-            for (int i = 1; i <= ID_SHIPS_OFFSET / 10; ++i) {
-                if (cellID / 10 == i) {
-                    isInShip = true;
-                    break;
-                }
-            }
-
-            if (isInShip) {
-                isHaveShip = true;
-            }
-        }
-
-        if (!isHaveShip) {
-            std::vector<Cell *> border = enemyField.getBorderCells(prevCellID);
+        if (enemyField.getShip(prevCellID)->getHP() <= 0) {
+            std::vector<Cell*> border = enemyField.getBorderCells(prevCellID);
 
             for (auto item: border) {
                 item->setID(1);
