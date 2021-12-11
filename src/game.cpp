@@ -117,9 +117,9 @@ short Game::prepareToGame() {
     bool isEscape = false;
     bool isArrows = false;
     int currentRow = 0;
-    _ui.setShipDoRowActive(currentRow);
     std::vector<unsigned> inactiveRows;
 
+    _ui.setShipDoRowActive(currentRow);
     _players[0].randomPlaceIsland(_players[0].getField().getWidth() * _players[0].getField().getHeight() / ISLAND_SQUARE - rand() % 10);
     while (!isAllShipsPlaced) {
         bool isSetupShip = false;
@@ -237,29 +237,36 @@ short Game::prepareToGame() {
                     }
 
                     if (c == 'r') {
-                        unsigned temp = shipWidth;
-                        shipWidth = shipLength;
-                        shipLength = temp;
-                        if (!isRotate) {
-                            int xSize = x.size();
-                            if (y[0] + xSize - 1 < width) {
-                                for (int i = 1; i < xSize; ++i) {
-                                    y.push_back(y[0] + i);
-                                    x.pop_back();
-                                }
+                        unsigned tempX = x[0];
+                        unsigned tempY = y[0];
+                        bool isCanRotate = false;
 
-                                isRotate = true;
+                        if (!isRotate) {
+                            if (tempY + shipWidth <= height) {
+                                isCanRotate = true;
                             }
                         } else {
-                            int ySize = y.size();
-                            if (x[0] + ySize - 1 < height) {
-                                for (int i = 1; i < ySize; ++i) {
-                                    x.push_back(x[0] + i);
-                                    y.pop_back();
-                                }
-
-                                isRotate = false;
+                            if (tempX + shipLength <= width) {
+                                isCanRotate = true;
                             }
+                        }
+
+                        if (isCanRotate) {
+                            unsigned temp = shipWidth;
+                            shipWidth = shipLength;
+                            shipLength = temp;
+                            x.clear();
+                            y.clear();
+
+                            for (int i = 0; i < shipWidth; ++i) {
+                                x.push_back(tempX + i);
+                            }
+
+                            for (int i = 0; i < shipLength; ++i) {
+                                y.push_back(tempY + i);
+                            }
+
+                            isRotate = !isRotate;
                         }
                     }
 
@@ -309,9 +316,7 @@ short Game::prepareToGame() {
 
                                 if (isTwoY) {
                                     if (i == y.size() - 2) {
-                                        if (field.getCell(x[j], y[i]).getID() != ISLAND_ID) {
-                                            border.push_back(&field.getCell(x[j], y[i]));
-                                        }
+                                        border.push_back(&field.getCell(x[j], y[i]));
 
                                         continue;
                                     } else if (i != y.size() - 1 && j != x.size() - 1 && j != y.size() - 2) {
@@ -324,9 +329,7 @@ short Game::prepareToGame() {
 
                                 if (isTwoX) {
                                     if (j == x.size() - 2) {
-                                        if (field.getCell(x[j], y[i]).getID() != ISLAND_ID) {
-                                            border.push_back(&field.getCell(x[j], y[i]));
-                                        }
+                                        border.push_back(&field.getCell(x[j], y[i]));
 
                                         continue;
                                     } else if (j != x.size() - 1 && i != y.size() - 1 && i != x.size() - 2) {
@@ -338,9 +341,7 @@ short Game::prepareToGame() {
                                 }
 
                                 if (i == y.size() - 1 || j == x.size() - 1) {
-                                    if (field.getCell(x[j], y[i]).getID() != ISLAND_ID) {
-                                        border.push_back(&field.getCell(x[j], y[i]));
-                                    }
+                                    border.push_back(&field.getCell(x[j], y[i]));
                                 } else {
                                     if (field.getCell(x[j], y[i]).getID() == ISLAND_ID) {
                                         isNotCorrectCells = true;
@@ -387,7 +388,7 @@ short Game::prepareToGame() {
                     }
 
                     if (isArrows) {
-                        if (c == 'B') {
+                        if (c == 'C') {
                             if (x[0] + shipWidth < width) {
                                 for (int i = 0; i < x.size(); ++i) {
                                     x[i]++;
@@ -399,7 +400,7 @@ short Game::prepareToGame() {
                             }
                         }
 
-                        if (c == 'A') {
+                        if (c == 'D') {
                             if (x[0] - 1 >= 0) {
                                 for (int i = 0; i < x.size(); ++i) {
                                     x[i]--;
@@ -411,7 +412,7 @@ short Game::prepareToGame() {
                             }
                         }
 
-                        if (c == 'C') {
+                        if (c == 'B') {
                             if (y[0] + shipLength < height) {
                                 for (int i = 0; i < y.size(); ++i) {
                                     y[i]++;
@@ -423,7 +424,7 @@ short Game::prepareToGame() {
                             }
                         }
 
-                        if (c == 'D') {
+                        if (c == 'A') {
                             if (y[0] - 1 >= 0) {
                                 for (int i = 0; i < y.size(); ++i) {
                                     y[i]--;
@@ -481,9 +482,6 @@ short Game::prepareToGame() {
         _computer.randomPlaceShip(STANDARD_ID_START + i);
     }
 
-    _rules.setWidthField(10);           // TODO(keberson): пока без кастомных правил, добавить позже
-    _rules.setHeightField(10);
-
     return SIGNAL_START_GAME;
 }
 
@@ -505,10 +503,8 @@ short Game::startGame() {
                 return SIGNAL_MENU;
             }
 
-            isCanTurn = (turnSignal == SIGNAL_TURN_HIT);
-
-            _ui.displayFields(_players[0].getField(), _computer.getField());
             sleep(1);
+            isCanTurn = (turnSignal == SIGNAL_TURN_HIT);
 
             if (_computer.getField().getNumberOfHits() == _rules.getSquareOfShips()) {
                 isGameEnd = true;
@@ -521,15 +517,9 @@ short Game::startGame() {
             break;
         }
 
-        _ui.displayFields(_players[0].getField(), _computer.getField());
-        std::cout << "Computer is attacking" << std::endl;
         sleep(1);
 
         while (_computer.turn(_players[0].getField(), _ui)) {
-            _ui.displayFields(_players[0].getField(), _computer.getField());
-            std::cout << "Computer is attacking again" << std::endl;
-            sleep(1);
-
             if (_players[0].getField().getNumberOfHits() == _rules.getSquareOfShips()) {
                 isGameEnd = true;
                 winner = "Computer";
@@ -711,6 +701,13 @@ short Game::openOptions() {
 
                         OPTIONS_RATIOS[rowCounter] = std::to_string(ratio);
                         _ui.setOptionsRatio(rowCounter, std::to_string(ratio));
+                        std::string temp = OPTIONS_DESCRIPTION[rowCounter];
+                        temp = temp.substr(temp.find(':') + 1);
+                        if (temp == "width") {
+                            _rules.setWidthField(ratio);
+                        } else if (temp == "height") {
+                            _rules.setHeightField(ratio);
+                        }
                     }
                 }
                 isEscape = false;
@@ -734,8 +731,8 @@ short Game::openTitles() {
 }
 
 void Game::loadFromFile() {
-    OPTIONS_RATIOS[3] = "10";//std::to_string(_rules.getWidthField());
-    OPTIONS_RATIOS[4] = "10";std::to_string(_rules.getHeightField());
+    OPTIONS_RATIOS[3] = std::to_string(_rules.getWidthField());
+    OPTIONS_RATIOS[4] = std::to_string(_rules.getHeightField());
 }
 
 void Game::launcher() {

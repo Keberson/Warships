@@ -1,6 +1,7 @@
 #include <ctime>
 #include <fstream>
 #include <sstream>
+#include <unistd.h>
 
 #include "gamerules.h"
 #include "standards.h"
@@ -51,13 +52,9 @@ void User::randomPlaceShip(unsigned id) {
                         }
 
                        if (offsetY == -1 || offsetY == currentWidth) {
-                           if (_field.getCell(randomX + offsetX, randomY + offsetY).getID() != ISLAND_ID) {
-                               border.push_back(&_field.getCell(randomX + offsetX, randomY + offsetY));
-                           }
+                           border.push_back(&_field.getCell(randomX + offsetX, randomY + offsetY));
                        } else if (offsetX == -1 || offsetX == currentLength) {
-                           if (_field.getCell(randomX + offsetX, randomY + offsetY).getID() != ISLAND_ID) {
-                               border.push_back(&_field.getCell(randomX + offsetX, randomY + offsetY));
-                           }
+                           border.push_back(&_field.getCell(randomX + offsetX, randomY + offsetY));
                        } else if (_field.getCell(randomX + offsetX, randomY + offsetY).getID() == ISLAND_ID) {
                            isFindCells = false;
                            break;
@@ -135,11 +132,6 @@ bool User::attackEnemy(unsigned x, unsigned y, Field& enemyField) {
 short Player::turn(Field& enemyField, ConsoleUI& ui) {
     int x = prevX;
     int y = prevY;
-    std::string tempStr = (char)(y + 'a') + ((x == 9) ? "10" : std::to_string(x + 1) + ' ');
-    std::cout << "\033[2K" << "Now your turn..." << std::endl;
-    std::cout << "Attack this cell: " << "\033[s" << tempStr << std::endl << std::endl;
-    std::cout << "\033[32m" << "Use the arrows (← ↑ ↓ →) to move around the playing field, press "
-                << "Enter when you select the desired cell" << "\033[37m";
 
     unsigned cellID = enemyField.getCell(x, y).getID();
     enemyField.setID(x, y, 2);
@@ -149,9 +141,14 @@ short Player::turn(Field& enemyField, ConsoleUI& ui) {
     bool isEscape = false;
     bool isArrows = false;
 
-    while (!isEnterPressed) {
-        ui.displayTheField(enemyField, 40, true);
+    std::string options = "player ";
+    options += "cell:";
+    options += (char)(y + 'a');
+    options += std::to_string(x + 1) + ';';
+    options += "isFirstTurn;";
+    ui.displayTheField(enemyField, "right", true, options);
 
+    while (!isEnterPressed) {
         c = getchar();
 
         if (c == 'q') {
@@ -170,7 +167,7 @@ short Player::turn(Field& enemyField, ConsoleUI& ui) {
             enemyField.setID(x, y, cellID);
 
             switch (c) {
-                case 'A':
+                case 'D':
                     if (x - 1 >= 0) {
                         x--;
                     } else {
@@ -178,7 +175,7 @@ short Player::turn(Field& enemyField, ConsoleUI& ui) {
                     }
 
                     break;
-                case 'B':
+                case 'C':
                     if (x + 1 < enemyField.getWidth()) {
                         x++;
                     } else {
@@ -186,7 +183,7 @@ short Player::turn(Field& enemyField, ConsoleUI& ui) {
                     }
 
                     break;
-                case 'C':
+                case 'B':
                     if (y + 1 < enemyField.getHeight()) {
                         y++;
                     } else {
@@ -194,7 +191,7 @@ short Player::turn(Field& enemyField, ConsoleUI& ui) {
                     }
 
                     break;
-                case 'D':
+                case 'A':
                     if (y - 1 >= 0) {
                         y--;
                     } else {
@@ -205,9 +202,12 @@ short Player::turn(Field& enemyField, ConsoleUI& ui) {
             }
 
             cellID = enemyField.getCell(x, y).getID();
-            enemyField.setID(x, y, 2);
-            std::string tempStr = (char)(y + 'a') + ((x == 9) ? "10" : std::to_string(x + 1) + ' ');
-            std::cout << "\033[u" << tempStr;
+            enemyField.setID(x, y,2);
+            options = "player ";
+            options += "cell:";
+            options += (char)(y + 'a');
+            options += std::to_string(x + 1) + ';';
+            ui.displayTheField(enemyField, "right", true, options);
         }
 
         if (c == '\n') {
@@ -223,15 +223,13 @@ short Player::turn(Field& enemyField, ConsoleUI& ui) {
                 isEnterPressed = true;
                 enemyField.getCell(x, y).setID(cellID);
             } else {
-                ui.setCursor(24, 1);
-                std::cout << "\033[2K";
-                std::cout << "\033[36m" << "Try again" << "\033[37m" ;
+                options = "player ";
+                options += "cell:" + (char)(y + 'a') + std::to_string(x + 1) + ';';
+                options += "isInvalidCell;";
+                ui.displayTheField(enemyField, "right", true, options);
             }
         }
     }
-
-    ui.setCursor(24, 1);
-    std::cout << "\033[2K";
 
     unsigned prevCellID = enemyField.getCell(x, y).getID();
 
@@ -240,22 +238,41 @@ short Player::turn(Field& enemyField, ConsoleUI& ui) {
         prevY = y;
 
         if (enemyField.getShip(prevCellID)->getHP() > 0) {
-            std::cout << "\033[31m" << "Hit!" << "\033[37m" << std::endl;
+            options = "player ";
+            options += "cell:";
+            options += (char)(y + 'a');
+            options += std::to_string(x + 1) + ';';
+            options += "isHit;";
+            ui.displayTheField(enemyField, "right", true, options);
         } else {
             std::vector<Cell*> border = enemyField.getBorderCells(prevCellID);
 
             for (auto item: border) {
-                item->setID(1);
+                if (item->getID() == ISLAND_ID) {
+                    item->setID(ISLAND_ID_ATTACKED);
+                } else {
+                    item->setID(1);
+                }
             }
 
-            std::cout << "\033[31m" << "Destroyed!" << "\033[37m" << std::endl;
+            options = "player ";
+            options += "cell:";
+            options += (char)(y + 'a');
+            options += std::to_string(x + 1) + ';';
+            options += "isDestroyed;";
+            ui.displayTheField(enemyField, "right", true, options);
         }
 
         return SIGNAL_TURN_HIT;
     } else {
         prevX = x;
         prevY = y;
-        std::cout << "\033[33m" << "Miss..." << "\033[37m" << std::endl;
+        options = "player ";
+        options += "cell:";
+        options += (char)(y + 'a');
+        options += std::to_string(x + 1) + ';';
+        options += "isMiss;";
+        ui.displayTheField(enemyField, "right", true, options);
         return SIGNAL_TURN_MISS;
     }
 }
@@ -265,6 +282,8 @@ short Computer::turn(Field& enemyField, ConsoleUI& ui) {
     unsigned randomX;
     unsigned randomY;
     bool isCorrectCell = false;
+    std::string options = "computer ";
+
     while (!isCorrectCell) {
         randomX = rand() % enemyField.getWidth();
         randomY = rand() % enemyField.getHeight();
@@ -282,20 +301,38 @@ short Computer::turn(Field& enemyField, ConsoleUI& ui) {
         }
     }
 
+    options += "isFirstTurn;";
+    ui.displayTheField(enemyField, "left", false, options);
+    sleep(1);
+    options = "computer ";
+
     unsigned prevCellID = enemyField.getCell(randomX, randomY).getID();
+    bool isGot = false;
+
     if (attackEnemy(randomX, randomY, enemyField)) {
         if (enemyField.getShip(prevCellID)->getHP() <= 0) {
             std::vector<Cell*> border = enemyField.getBorderCells(prevCellID);
 
             for (auto item: border) {
-                item->setID(1);
+                if (item->getID() == ISLAND_ID) {
+                    item->setID(ISLAND_ID_ATTACKED);
+                } else {
+                    item->setID(1);
+                }
             }
 
-            std::cout << "\033[31m" << "Destroyed!" << "\033[37m" << std::endl;
+            options += "isDestroyed;";
+        } else {
+            options += "isHit;";
         }
 
-        return true;
+        isGot = true;
+    } else {
+        options += "isMiss;";
     }
 
-    return false;
+    ui.displayTheField(enemyField, "left", false, options);
+    sleep(1);
+
+    return isGot;
 }

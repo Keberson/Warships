@@ -1,5 +1,5 @@
 rules:
-    width: 10
+    width: 15
     height: 10
     numberOfShips: 10
     typeOfShips: classic

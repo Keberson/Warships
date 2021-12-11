@@ -9,8 +9,8 @@
 class IUI {
 public:
     virtual void displayMenu() = 0;
-    virtual void displayFields(Field& leftField, Field& rightField) = 0;
-    virtual void displayTheField(Field& field, unsigned offset, bool isHide) = 0;
+    virtual void displayFields(Field& leftField, Field& rightField, std::string options = "") = 0;
+    virtual void displayTheField(Field& field, std::string position, bool isHide, std::string options = "") = 0;
     virtual void clearScreen() = 0;
     virtual ~IUI() {};
 };
@@ -40,8 +40,8 @@ public:
     void setShipDoRowActive(unsigned row);
     void setShipDoRowInactive(unsigned row);
     void setShipDoRowFilled(unsigned row);
-    void displayFields(Field& leftField, Field& rightField);
-    void displayTheField(Field& field, unsigned offset, bool isHide);
+    void displayFields(Field& leftField, Field& rightField, std::string options = "");
+    void displayTheField(Field& field, std::string position, bool isHide, std::string options = "");
     void clearScreen();
     void setInputMode();
     void setBackground();

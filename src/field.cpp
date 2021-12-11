@@ -6,15 +6,15 @@ Field::Field(unsigned width, unsigned height, std::vector<Ship> ships) {
     _width = width;
     _height = height;
     _ships = ships;
-    for (unsigned i = 0; i < width; ++i) {
-        for (unsigned j = 0; j < height; ++j) {
+    for (unsigned j = 0; j < height; ++j) {
+        for (unsigned i = 0; i < width; ++i) {
             _cells.emplace_back(i, j, 0);
         }
     }
 }
 
 void Field::setID(unsigned x, unsigned y, unsigned id) {
-    _cells[x * _width + y].setID(id);
+    getCell(x, y).setID(id);
 }
 
 Ship* Field::getShip(unsigned int id) {

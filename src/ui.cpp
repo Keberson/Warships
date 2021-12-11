@@ -17,6 +17,11 @@
 
 #define MENU_INDENT 3
 
+#define FIELD_SPACE 1
+#define FIELD_INDENT 5
+#define FIELD_CELL_WIDTH 2
+#define FIELD_CELL_HEIGHT 1
+
 struct termios savedAttributes;
 
 unsigned MENU_INTERACTIVE_STRING_START = 3;
@@ -248,7 +253,7 @@ void ConsoleUI::displayMenu() {
 
     for (auto item: MENU) {
         setCursor(++rowCounter, colCounter - (item.getLength() / 2));
-        std::cout << item;
+        std::cout << item << std::flush;
     }
 
     std::cout << "\033[37m";
@@ -301,7 +306,7 @@ void ConsoleUI::displayOptions() {
 
     for (auto item: OPTIONS) {
         setCursor(++rowCounter, colCounter - (item.getLength() / 2));
-        std::cout << item;
+        std::cout << item << std::flush;
     }
 
     std::cout << "\033[37m";
@@ -374,13 +379,11 @@ void ConsoleUI::prepareShipSelect(Field& field) {
 }
 
 void ConsoleUI::displayShipsSelect(Field& field) {
-    displayTheField(field, 1, false);
-    std::cout << "\033[32m" << "Use the arrows (← ↑ ↓ →) to move selected ship around the playing field, press "
-                 << "Enter when you select the cells, press R to rotate ship, press P to use random set" << "\033[37m";
-
+    displayTheField(field, "left", false, "isPrepareState");
     unsigned rowCounter = 3;
+    unsigned column = field.getWidth() * FIELD_CELL_WIDTH + (field.getWidth() + 1) * FIELD_SPACE + FIELD_INDENT;
     for (auto item: SHIPS_SELECT) {
-        setCursor(rowCounter, 40);
+        setCursor(rowCounter, column);
         std::cout << item << std::flush;
         rowCounter++;
     }
@@ -402,32 +405,70 @@ void ConsoleUI::setShipDoRowFilled(unsigned row) {
     SHIPS_SELECT[row].setColor(1);
 }
 
-void ConsoleUI::displayFields(Field& leftField, Field& rightField) {
-    unsigned offset = 40;
-    //unsigned y = leftField.getHeight()*2 + 2;
-    displayTheField(leftField, 1, false);
-    displayTheField(rightField, offset, true);
-    setCursor(25, 1);
-    std::cout << "\033[J";
-    setCursor(24, 1);
+void ConsoleUI::displayFields(Field& leftField, Field& rightField, std::string options) {
+    displayTheField(leftField, "left", false);
+    displayTheField(rightField, "right", true, options);
 }
 
-void ConsoleUI::displayTheField(Field& field, unsigned offset, bool isHide) {
-    unsigned space = 5;
-    unsigned widthField = 31;         // romax() / 2 - space;    widthCell*10 + 11*1
-    unsigned widthCell = 2;           // (widthField - (width + 1)) / numb;
-    unsigned heightCell = 1;          // widthCell / 2;
+void ConsoleUI::displayTheField(Field& field, std::string position, bool isHide, std::string options) {
+    const unsigned width = field.getWidth();
+    unsigned widthField = width * (FIELD_CELL_WIDTH + FIELD_SPACE);
     unsigned counterY = 0;
     unsigned rowCounter = 0;
     unsigned columnCounter = 0;
-
+    unsigned offset = 0;
     bool isBlackRow = false;
+    bool isPlayerTurn = false;
+    bool isComputerTurn = false;
+    bool isPrepareState = false;
+    bool isFirstTurn = false;
+    bool isMiss = false;
+    bool isHit= false;
+    bool isDestroyed = false;
+    bool isInvalidCell = false;
+    std::string cell = "";
+
+    if (options.find("isPrepareState") != std::string::npos) {
+        isPrepareState = true;
+    } else if (options.find("player") != std::string::npos) {
+        isPlayerTurn = true;
+    } else if (options.find("computer") != std::string::npos) {
+        isComputerTurn = true;
+    }
+
+    if (options.find("isFirstTurn") != std::string::npos) {
+        isFirstTurn = true;
+    } else if (options.find("isMiss") != std::string::npos) {
+        isMiss = true;
+    } else if (options.find("isHit") != std::string::npos) {
+        isHit = true;
+    } else if (options.find("isDestroyed") != std::string::npos) {
+        isDestroyed = true;
+    } else if (options.find("isInvalidCell") != std::string::npos) {
+        isInvalidCell = true;
+    }
+
+    auto name = options.find("cell:");
+    if (name != std::string::npos) {
+        cell = options.substr(name + 5);
+        cell = cell.substr(0, options.find(';') - (name + 5));
+    }
+
+    if (position == "left") {
+        offset = 1;
+    } else if (position == "right") {
+        offset = widthField + FIELD_INDENT;
+    }
 
     setCursor(1, offset);
-    std::cout << "   a  b  c  d  e  f  g  h  i  j";
+    std::cout << "   ";
+    for (int i = 0; i < width; ++i) {
+        std::cout << (char)('a' + i) << "  ";
+    }
+
     while (rowCounter != (field.getHeight() + 1)) {
         setCursor(counterY + 2, offset);
-        if (counterY % (heightCell + 1) == 0) {
+        if (counterY % (FIELD_CELL_HEIGHT + 1) == 0) {
             isBlackRow = true;
             rowCounter++;
         } else {
@@ -441,30 +482,30 @@ void ConsoleUI::displayTheField(Field& field, unsigned offset, bool isHide) {
             if (isBlackRow) {
                 setBackground();
             } else {
-                if (j % (widthCell + 1) == 0) {
+                if (j % (FIELD_CELL_WIDTH + 1) == 0) {
                     setBackground();
                     columnCounter++;
-                } else if (field.getCell(rowCounter - 1, columnCounter).getID() == EMPTY_CELL_ID) {
+                } else if (field.getCell(columnCounter, rowCounter - 1).getID() == EMPTY_CELL_ID) {
                     setSeaCell();
-                } else if (field.getCell(rowCounter - 1, columnCounter).getID() == ISLAND_ID_ATTACKED) {
+                } else if (field.getCell(columnCounter, rowCounter - 1).getID() == ISLAND_ID_ATTACKED) {
                     setIslandCell();
-                } else if (field.getCell(rowCounter - 1, columnCounter).getID() == ISLAND_ID) {
+                } else if (field.getCell(columnCounter, rowCounter - 1).getID() == ISLAND_ID) {
                     if (isHide) {
                         setSeaCell();
                     } else {
                         setIslandCell();
                     }
-                } else if (field.getCell(rowCounter - 1, columnCounter).getID() / 10 == 1) {
+                } else if (field.getCell(columnCounter, rowCounter - 1).getID() / 10 == 1) {
                     if (isHide) {
                         setSeaCell();
                     } else {
                         setShipCell();
                     }
-                } else if (field.getCell(rowCounter - 1, columnCounter).getID() / 10 == 2) {
+                } else if (field.getCell(columnCounter, rowCounter - 1).getID() / 10 == 2) {
                     setDestroyedShip();
-                } else if (field.getCell(rowCounter - 1, columnCounter).getID() % 10 == 2) {
+                } else if (field.getCell(columnCounter, rowCounter - 1).getID() % 10 == 2) {
                     setActiveCell();
-                } else if (field.getCell(rowCounter - 1, columnCounter).getID() % 10 == 5) {
+                } else if (field.getCell(columnCounter, rowCounter - 1).getID() % 10 == 5) {
                     setSelectShip();
                 } else {
                     setMissCell();
@@ -479,18 +520,50 @@ void ConsoleUI::displayTheField(Field& field, unsigned offset, bool isHide) {
 
     setBackground();
     std::cout << std::endl;
+    if (isFirstTurn) {
+        std::cout << "\033[s" << "\033[J" << "\033[u";
+    }
+
+    if (isPrepareState) {
+        std::cout << "\033[32m" << "Use the arrows (← ↑ ↓ →) to move selected ship around the playing field, press "
+                  << "Enter when you select the cells, press R to rotate ship, press P to use random set" << "\033[37m";
+    }
+
+    if (isPlayerTurn) {
+        if (isFirstTurn) {
+            std::cout << "\033[2K" << "Now your turn..." << std::endl;
+            std::cout << "Attack this cell: " << "\033[s" << " " << std::endl << std::endl;
+            std::cout << "\033[32m" << "Use the arrows (← ↑ ↓ →) to move around the playing field, press "
+                      << "Enter when you select the desired cell" << "\033[37m";
+        } else if (isMiss) {
+            std::cout << "\033[2K" << "\033[33m" << "Miss..." << "\033[37m" << std::endl;
+        } else if (isHit) {
+            std::cout << "\033[2K" << "\033[31m" << "Hit!" << "\033[37m" << std::endl;
+        } else if (isDestroyed) {
+            std::cout << "\033[2K" << "\033[31m" << "Destroyed!" << "\033[37m" << std::endl;
+        } else if (isInvalidCell) {
+            std::cout << "\033[2K" << "\033[36m" << "Try again" << "\033[37m" << std::endl;;
+        }
+
+        std::cout << "\033[u" << "\033[K" << cell;
+    }
+
+    if (isComputerTurn) {
+        if (isFirstTurn) {
+            std::cout << "\033[2K" << "Computer is attacking" << std::endl;
+        } else if (isMiss) {
+            std::cout << "\033[2K" << "\033[33m" << "Miss..." << "\033[37m" << std::endl;
+        } else if (isDestroyed) {
+            std::cout << "\033[2K" << "\033[31m" << "Destroyed!" << "\033[37m" << std::endl;
+        }
+    }
 }
 
 
 void ConsoleUI::clearScreen() {
-    for (unsigned i = 1; i <= romax(); ++i) {
-        for (unsigned j = 1; j <= comax(); ++j) {
-            setCursor(i, j);
-            setBackground();
-        }
-    }
-
-    std::cout << "\033[2J";
+    setCursor(1,1);
+    std::cout << "\033[J";
+    setCursor(1,1);
 }
 
 void ConsoleUI::setInputMode() {
