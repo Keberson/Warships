@@ -149,6 +149,7 @@ short Player::turn(Field& enemyField, ConsoleUI& ui) {
     ui.displayTheField(enemyField, "right", true, options);
 
     while (!isEnterPressed) {
+        
         c = getchar();
 
         if (c == 'q') {
