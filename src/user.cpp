@@ -1,7 +1,6 @@
 #include <ctime>
 #include <fstream>
 #include <sstream>
-#include <termios.h>
 #include <unistd.h>
 
 #include "gamerules.h"
@@ -180,6 +179,28 @@ short User::saveSession(std::string name, Field& enemyField) {
             file << '\t' << "~~~" << std::endl;
         }
 
+        for (int j = 0; j < ships.size(); ++j) {
+            file  << "\tBorder" << ":" << std::endl;
+            file << "\t\t" << "id:" << ((i == 1) ? enemyShips[j].getId() : ships[j].getId()) << std::endl;
+            std::vector<Cell*> shipBorder;
+            if (i == 1) {
+                shipBorder = enemyField.getBorderCells(enemyShips[j].getId());
+            } else {
+                shipBorder = _field.getBorderCells(ships[j].getId());
+            }
+
+            for (auto item: shipBorder) {
+                file << "\t\t" << "Cell" << ":" << std::endl;
+                file << "\t\t\t" << "x:" << item->getX() << std::endl;
+                file << "\t\t\t" << "y:" << item->getY() << std::endl;
+                file << "\t\t\t" << "id:" << item->getID() << std::endl;
+                file << "\t\t" << "~~~" << std::endl;
+            }
+
+            file << "\t" << "~~~" << std::endl;
+
+        }
+
         file << "~~~" << std::endl;
     }
 
@@ -198,6 +219,7 @@ short User::loadSession(std::string name, Field& enemyField) {
     bool isEnemyField = false;
     bool isCell = false;
     bool isShip = false;
+    bool isBorder = false;
     bool isHaveWidth = false;
     bool isHaveHeight = false;
     bool isHaveX = false;
@@ -207,6 +229,7 @@ short User::loadSession(std::string name, Field& enemyField) {
     bool isHaveShipName = false;
     bool isHaveShipWidth = false;
     bool isHaveShipLength = false;
+    bool isHaveShipBorderID = false;
     unsigned width;
     unsigned height;
     unsigned x;
@@ -216,9 +239,15 @@ short User::loadSession(std::string name, Field& enemyField) {
     std::string nameShip;
     unsigned widthShip;
     unsigned lengthShip;
+    unsigned idShipBorder;
     std::vector<Cell> notZerosCells;
     std::vector<Ship> ships;
+    std::vector<Cell> borderShips;
+    std::vector<std::vector<Cell>> borders;
+    std::vector<unsigned> idBorders;
+    int i = 0;
     while (getline(file, line)) {
+        i++;
         if (isField) {
             auto commentPos = line.find("//");
             if (commentPos != std::string::npos) {
@@ -236,6 +265,8 @@ short User::loadSession(std::string name, Field& enemyField) {
                         isCell = true;
                     } else if (beforeSymbol == "Ship") {
                         isShip = true;
+                    } else if (beforeSymbol == "Border") {
+                        isBorder = true;
                     } else {
                         return ERROR_OPEN;
                     }
@@ -259,9 +290,7 @@ short User::loadSession(std::string name, Field& enemyField) {
                             id = atoi(afterSymbol.c_str());
                             isHaveID = true;
                         }
-                    }
-
-                    if (isShip) {
+                    } else if (isShip) {
                         if (beforeSymbol == "id") {
                             idShip = atoi(afterSymbol.c_str());
                             isHaveShipID = true;
@@ -274,6 +303,11 @@ short User::loadSession(std::string name, Field& enemyField) {
                         } else if (beforeSymbol == "length") {
                             lengthShip = atoi(afterSymbol.c_str());
                             isHaveShipLength = true;
+                        }
+                    } else if (isBorder) {
+                        if (beforeSymbol == "id") {
+                            idShipBorder = atoi(afterSymbol.c_str());
+                            isHaveShipBorderID = true;
                         }
                     }
                 }
@@ -303,12 +337,28 @@ short User::loadSession(std::string name, Field& enemyField) {
                     return ERROR_OPEN;
                 }
 
-                notZerosCells.push_back(Cell(x, y, id));
+                if (isBorder) {
+                    borderShips.push_back(Cell(x, y, id));
+                } else {
+                    notZerosCells.push_back(Cell(x, y, id));
+                }
+
 
                 isHaveX = false;
                 isHaveY = false;
                 isHaveID = false;
                 isCell = false;
+            } else if (isBorder) {
+                if (!isHaveShipBorderID || borderShips.size() == 0) {
+                    return ERROR_OPEN;
+                }
+
+                borders.push_back(borderShips);
+                idBorders.push_back(idShipBorder);
+
+                borderShips.clear();
+                isHaveShipID = false;
+                isBorder = false;
             } else if (isField) {
                 if (!isHaveWidth || !isHaveHeight) {
                     return ERROR_OPEN;
@@ -322,12 +372,30 @@ short User::loadSession(std::string name, Field& enemyField) {
                 if (isEnemyField) {
                     enemyField = temp;
                     isEnemyField = false;
+                    for (int i = 0; i < borders.size(); ++i) {
+                        std::vector<Cell*> temp;
+                        for (auto item: borders[i]) {
+                            temp.push_back(&enemyField.getCell(item.getX(), item.getY()));
+                        }
+
+                        enemyField.addShipBorder(idBorders[i], temp);
+                    }
                 } else {
                     _field = temp;
+                    for (int i = 0; i < borders.size(); ++i) {
+                        std::vector<Cell*> temp;
+                        for (auto item: borders[i]) {
+                            temp.push_back(&_field.getCell(item.getX(), item.getY()));
+                        }
+
+                        _field.addShipBorder(idBorders[i], temp);
+                    }
                 }
 
                 ships.clear();
                 notZerosCells.clear();
+                borders.clear();
+                idBorders.clear();
                 isField = false;
             }
         }
@@ -363,6 +431,7 @@ short Player::turn(Field& enemyField, ConsoleUI& ui) {
         }
 
         if (c == 's') {
+            bool isExit = false;
             options.clear();
             options += "player";
             options += "cell:";
@@ -375,11 +444,16 @@ short Player::turn(Field& enemyField, ConsoleUI& ui) {
             while (!isInputEnd) {
                 c = getchar();
 
-                if (c == '\n') {
+                if (c == 27) {
+                    isExit = true;
+                    break;
+                } else if (c == '\n') {
                     isInputEnd = true;
                 } else if (c == 127) {
-                    filename.pop_back();
-                    options.pop_back();
+                    if (filename.size() >= 1) {
+                        filename.pop_back();
+                        options.pop_back();
+                    }
                 } else {
                     filename += c;
                     options += c;
@@ -389,29 +463,40 @@ short Player::turn(Field& enemyField, ConsoleUI& ui) {
             }
 
             c = '\0';
-            enemyField.setID(x, y, cellID);
-            options.clear();
-            std::string temp;
-            if (saveSession(filename, enemyField) != SUCCESS) {
-                temp = "Unable to open file ";
-            } else {
-                prevX = 0;
-                prevY = 0;
-                x = 0;
-                y = 0;
-                temp = "Success saved to ";
-            }
+            if (!isExit) {
+                enemyField.setID(x, y, cellID);
+                options.clear();
+                std::string temp;
+                if (saveSession(filename, enemyField) != SUCCESS) {
+                    temp = "Unable to open file ";
+                } else {
+                    temp = "Success saved to ";
+                }
 
-            enemyField.setID(x, y, 2);
-            options += "player";
-            options += "cell:";
-            options += (char)(y + 'a');
-            options += std::to_string(x + 1) + ';';
-            options += "isOpened" + temp + filename;
-            ui.displayTheField(enemyField, "right", true, options);
+                enemyField.setID(x, y, 2);
+                options += "player ";
+                options += "isFirstTurn;";
+                ui.clearScreen();
+                ui.displayFields(getField(), enemyField, options);
+                options = "player ";
+                options += "cell:";
+                options += (char)(y + 'a');
+                options += std::to_string(x + 1) + ';';
+                options += "isOpened" + temp + filename;
+                ui.displayFields(getField(), enemyField, options);
+            } else {
+                std::string options;
+                options = "player ";
+                options += "cell:";
+                options += (char)(y + 'a');
+                options += std::to_string(x + 1) + ';';
+                options += "isFirstTurn;";
+                ui.displayTheField(enemyField, "right", true, options);
+            }
         }
 
         if (c == 'l') {
+            bool isExit = false;
             options.clear();
             options += "player";
             options += "cell:";
@@ -424,7 +509,10 @@ short Player::turn(Field& enemyField, ConsoleUI& ui) {
             while (!isInputEnd) {
                 c = getchar();
 
-                if (c == '\n') {
+                if (c == 27) {
+                    isExit = true;
+                    break;
+                } else if (c == '\n') {
                     isInputEnd = true;
                 } else if (c == 127) {
                     filename.pop_back();
@@ -434,30 +522,45 @@ short Player::turn(Field& enemyField, ConsoleUI& ui) {
                     options += c;
                 }
 
-                ui.displayTheField(enemyField, "right", true, options);
+                ui.displayFields(getField(), enemyField, options);
             }
 
             c = '\0';
-            enemyField.setID(x, y, cellID);
-            options.clear();
-            std::string temp;
-            if (loadSession(filename, enemyField) != SUCCESS) {
-                temp = "Unable to open file ";
-            } else {
-                prevX = 0;
-                prevY = 0;
-                x = 0;
-                y = 0;
-                temp = "Success loaded to ";
-            }
+            if (!isExit) {
+                enemyField.setID(x, y, cellID);
+                options.clear();
+                std::string temp;
+                if (loadSession(filename, enemyField) != SUCCESS) {
+                    temp = "Unable to open file ";
+                } else {
+                    prevX = 0;
+                    prevY = 0;
+                    x = 0;
+                    y = 0;
+                    temp = "Success loaded to ";
+                }
 
-            cellID = enemyField.getCell(x, y).getID();
-            options += "player";
-            options += "cell:";
-            options += (char)(y + 'a');
-            options += std::to_string(x + 1) + ';';
-            options += "isOpened" + temp + filename;
-            ui.displayTheField(enemyField, "right", true, options);
+                cellID = enemyField.getCell(x, y).getID();
+                enemyField.setID(x, y, 2);
+                options += "player ";
+                options += "isFirstTurn;";
+                ui.clearScreen();
+                ui.displayFields(getField(), enemyField, options);
+                options = "player ";
+                options += "cell:";
+                options += (char)(y + 'a');
+                options += std::to_string(x + 1) + ';';
+                options += "isOpened" + temp + filename;
+                ui.displayFields(getField(), enemyField, options);
+            } else {
+                std::string options;
+                options = "player ";
+                options += "cell:";
+                options += (char)(y + 'a');
+                options += std::to_string(x + 1) + ';';
+                options += "isFirstTurn;";
+                ui.displayTheField(enemyField, "right", true, options);
+            }
         }
 
         if (c == '\033') {

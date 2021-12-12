@@ -568,6 +568,8 @@ void ConsoleUI::displayTheField(Field& field, std::string position, bool isHide,
             std::cout << "\033[2K" << "Computer is attacking" << std::endl;
         } else if (isMiss) {
             std::cout << "\033[2K" << "\033[33m" << "Miss..." << "\033[37m" << std::endl;
+        } else if (isHit) {
+            std::cout << "\033[2K" << "\033[31m" << "Hit!" << "\033[37m" << std::endl;
         } else if (isDestroyed) {
             std::cout << "\033[2K" << "\033[31m" << "Destroyed!" << "\033[37m" << std::endl;
         }
