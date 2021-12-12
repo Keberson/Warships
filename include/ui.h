@@ -12,6 +12,7 @@ public:
     virtual void displayFields(Field& leftField, Field& rightField, std::string options = "") = 0;
     virtual void displayTheField(Field& field, std::string position, bool isHide, std::string options = "") = 0;
     virtual void clearScreen() = 0;
+    virtual char getSymbol() = 0;
     virtual ~IUI() {};
 };
 
@@ -19,6 +20,7 @@ class ConsoleUI: public IUI {
 public:
     ConsoleUI() {};
     // Menu
+    char getSymbol();
     void buildMenu();
     void displayMenu();
     unsigned getMenuSize();
@@ -42,6 +44,7 @@ public:
     void setShipDoRowFilled(unsigned row);
     void displayFields(Field& leftField, Field& rightField, std::string options = "");
     void displayTheField(Field& field, std::string position, bool isHide, std::string options = "");
+    void displayWinnerMessage(std::string winner);
     void clearScreen();
     void setInputMode();
     void setBackground();

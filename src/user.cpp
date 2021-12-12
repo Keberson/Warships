@@ -1,6 +1,7 @@
 #include <ctime>
 #include <fstream>
 #include <sstream>
+#include <termios.h>
 #include <unistd.h>
 
 #include "gamerules.h"
@@ -129,6 +130,212 @@ bool User::attackEnemy(unsigned x, unsigned y, Field& enemyField) {
     return false;
 }
 
+short User::saveSession(std::string name, Field& enemyField) {
+    std::fstream file;
+    file.open(name, std::ios_base::out);
+    if (!file.is_open()) {
+        return ERROR_OPEN;
+    }
+
+    for (int i = 0; i < 2; ++i) {
+        std::string title = "field:";
+        if (i == 1) {
+            title = "enemyField:";
+        }
+
+        file << title << std::endl;
+        file << '\t' << "width:" << _field.getWidth() << std::endl;
+        file << '\t' << "height:" << _field.getHeight() << std::endl;
+
+        std::vector<Cell> cells = _field.getAllCells();
+        std::vector<Cell> enemyCells = enemyField.getAllCells();
+
+        for (int j = 0; j < cells.size(); ++j) {
+            if (i == 1) {
+                if (enemyCells[j].getID() == 0) {
+                    continue;
+                }
+            } else {
+                if (cells[j].getID() == 0) {
+                    continue;
+                }
+            }
+
+            file << '\t' << "Cell" << ':' << std::endl;
+            file << "\t\t" << "x:" << ((i == 1) ? enemyCells[j].getX() : cells[j].getX()) << std::endl;
+            file << "\t\t" << "y:" << ((i == 1) ? enemyCells[j].getY() : cells[j].getY()) << std::endl;
+            file << "\t\t" << "id:" << ((i == 1) ? enemyCells[j].getID() : cells[j].getID()) << std::endl;
+            file << '\t' << "~~~" << std::endl;
+        }
+
+        std::vector<Ship> ships = _field.getAllShips();
+        std::vector<Ship> enemyShips = enemyField.getAllShips();
+
+        for (int j = 0; j < ships.size(); ++j) {
+            file << '\t' << "Ship" << ":" << std::endl;
+            file << "\t\t" << "id:" << ((i == 1) ? enemyShips[j].getId() : ships[j].getId()) << std::endl;
+            file << "\t\t" << "name:" << ((i == 1) ? enemyShips[j].getName() : ships[j].getName()) << std::endl;
+            file << "\t\t" << "width:" << ((i == 1) ? enemyShips[j].getWidth() : ships[j].getWidth()) << std::endl;
+            file << "\t\t" << "length:" << ((i == 1) ? enemyShips[j].getLength() : ships[j].getLength()) << std::endl;
+            file << '\t' << "~~~" << std::endl;
+        }
+
+        file << "~~~" << std::endl;
+    }
+
+    file.close();
+    return SUCCESS;
+}
+
+short User::loadSession(std::string name, Field& enemyField) {
+    std::fstream file(name);
+    if (!file.is_open()) {
+        return ERROR_OPEN;
+    }
+
+    std::string line;
+    bool isField = false;
+    bool isEnemyField = false;
+    bool isCell = false;
+    bool isShip = false;
+    bool isHaveWidth = false;
+    bool isHaveHeight = false;
+    bool isHaveX = false;
+    bool isHaveY = false;
+    bool isHaveID = false;
+    bool isHaveShipID = false;
+    bool isHaveShipName = false;
+    bool isHaveShipWidth = false;
+    bool isHaveShipLength = false;
+    unsigned width;
+    unsigned height;
+    unsigned x;
+    unsigned y;
+    unsigned id;
+    unsigned idShip;
+    std::string nameShip;
+    unsigned widthShip;
+    unsigned lengthShip;
+    std::vector<Cell> notZerosCells;
+    std::vector<Ship> ships;
+    while (getline(file, line)) {
+        if (isField) {
+            auto commentPos = line.find("//");
+            if (commentPos != std::string::npos) {
+                line = line.substr(0, commentPos);
+            }
+
+            auto symbolPos = line.find(':');
+            if (symbolPos != std::string::npos) {
+                auto beforeSymbol = line.substr(0, symbolPos);
+                auto afterSymbol = line.substr(symbolPos+1);
+                beforeSymbol = deleteSymbols(beforeSymbol, "\t ");
+                afterSymbol = deleteSymbols(afterSymbol, "\t \n\r");
+                if (afterSymbol.empty()) {
+                    if (beforeSymbol == "Cell") {
+                        isCell = true;
+                    } else if (beforeSymbol == "Ship") {
+                        isShip = true;
+                    } else {
+                        return ERROR_OPEN;
+                    }
+                } else {
+                    if (beforeSymbol == "width" && !isShip) {
+                        width = atoi(afterSymbol.c_str());
+                        isHaveWidth = true;
+                    } else if (beforeSymbol == "height" && !isShip) {
+                        height = atoi(afterSymbol.c_str());
+                        isHaveHeight = true;
+                    }
+
+                    if (isCell) {
+                        if (beforeSymbol == "x") {
+                            x = atoi(afterSymbol.c_str());
+                            isHaveX = true;
+                        } else if (beforeSymbol == "y") {
+                            y = atoi(afterSymbol.c_str());
+                            isHaveY = true;
+                        } else if (beforeSymbol == "id") {
+                            id = atoi(afterSymbol.c_str());
+                            isHaveID = true;
+                        }
+                    }
+
+                    if (isShip) {
+                        if (beforeSymbol == "id") {
+                            idShip = atoi(afterSymbol.c_str());
+                            isHaveShipID = true;
+                        } else if (beforeSymbol == "name") {
+                            nameShip = afterSymbol;
+                            isHaveShipName = true;
+                        } else if (beforeSymbol == "width") {
+                            widthShip = atoi(afterSymbol.c_str());
+                            isHaveShipWidth = true;
+                        } else if (beforeSymbol == "length") {
+                            lengthShip = atoi(afterSymbol.c_str());
+                            isHaveShipLength = true;
+                        }
+                    }
+                }
+            }
+        }
+
+        if (line.find("field") != std::string::npos) {
+            isField = true;
+        } else if (line.find("enemyField") != std::string::npos) {
+            isField = true;
+            isEnemyField = true;
+        } else if (line.find("~~~") != std::string::npos) {
+            if (isShip) {
+                if (!isHaveShipID || !isHaveShipName || !isHaveShipWidth || !isHaveShipLength) {
+                    return ERROR_OPEN;
+                }
+
+                ships.push_back(Ship(idShip, nameShip, widthShip, lengthShip));
+
+                isHaveShipID = false;
+                isHaveShipName = false;
+                isHaveShipWidth = false;
+                isHaveShipLength = false;
+                isShip = false;
+            } else if (isCell) {
+                if (!isHaveX || !isHaveY || !isHaveID) {
+                    return ERROR_OPEN;
+                }
+
+                notZerosCells.push_back(Cell(x, y, id));
+
+                isHaveX = false;
+                isHaveY = false;
+                isHaveID = false;
+                isCell = false;
+            } else if (isField) {
+                if (!isHaveWidth || !isHaveHeight) {
+                    return ERROR_OPEN;
+                }
+
+                Field temp(width, height, ships);
+                for (auto item: notZerosCells) {
+                    temp.setID(item.getX(), item.getY(), item.getID());
+                }
+
+                if (isEnemyField) {
+                    enemyField = temp;
+                    isEnemyField = false;
+                } else {
+                    _field = temp;
+                }
+
+                ships.clear();
+                notZerosCells.clear();
+                isField = false;
+            }
+        }
+    }
+
+    return SUCCESS;
+}
+
 short Player::turn(Field& enemyField, ConsoleUI& ui) {
     int x = prevX;
     int y = prevY;
@@ -149,11 +356,108 @@ short Player::turn(Field& enemyField, ConsoleUI& ui) {
     ui.displayTheField(enemyField, "right", true, options);
 
     while (!isEnterPressed) {
-        
-        c = getchar();
+        c = ui.getSymbol();
 
         if (c == 'q') {
             return SIGNAL_GAME_EXIT;
+        }
+
+        if (c == 's') {
+            options.clear();
+            options += "player";
+            options += "cell:";
+            options += (char)(y + 'a');
+            options += std::to_string(x + 1) + ';';
+            options += "isSaveLoad:";
+            ui.displayTheField(enemyField, "right", true, options);
+            bool isInputEnd = false;
+            std::string filename;
+            while (!isInputEnd) {
+                c = getchar();
+
+                if (c == '\n') {
+                    isInputEnd = true;
+                } else if (c == 127) {
+                    filename.pop_back();
+                    options.pop_back();
+                } else {
+                    filename += c;
+                    options += c;
+                }
+
+                ui.displayTheField(enemyField, "right", true, options);
+            }
+
+            c = '\0';
+            enemyField.setID(x, y, cellID);
+            options.clear();
+            std::string temp;
+            if (saveSession(filename, enemyField) != SUCCESS) {
+                temp = "Unable to open file ";
+            } else {
+                prevX = 0;
+                prevY = 0;
+                x = 0;
+                y = 0;
+                temp = "Success saved to ";
+            }
+
+            enemyField.setID(x, y, 2);
+            options += "player";
+            options += "cell:";
+            options += (char)(y + 'a');
+            options += std::to_string(x + 1) + ';';
+            options += "isOpened" + temp + filename;
+            ui.displayTheField(enemyField, "right", true, options);
+        }
+
+        if (c == 'l') {
+            options.clear();
+            options += "player";
+            options += "cell:";
+            options += (char)(y + 'a');
+            options += std::to_string(x + 1) + ';';
+            options += "isSaveLoad:";
+            ui.displayTheField(enemyField, "right", true, options);
+            bool isInputEnd = false;
+            std::string filename;
+            while (!isInputEnd) {
+                c = getchar();
+
+                if (c == '\n') {
+                    isInputEnd = true;
+                } else if (c == 127) {
+                    filename.pop_back();
+                    options.pop_back();
+                } else {
+                    filename += c;
+                    options += c;
+                }
+
+                ui.displayTheField(enemyField, "right", true, options);
+            }
+
+            c = '\0';
+            enemyField.setID(x, y, cellID);
+            options.clear();
+            std::string temp;
+            if (loadSession(filename, enemyField) != SUCCESS) {
+                temp = "Unable to open file ";
+            } else {
+                prevX = 0;
+                prevY = 0;
+                x = 0;
+                y = 0;
+                temp = "Success loaded to ";
+            }
+
+            cellID = enemyField.getCell(x, y).getID();
+            options += "player";
+            options += "cell:";
+            options += (char)(y + 'a');
+            options += std::to_string(x + 1) + ';';
+            options += "isOpened" + temp + filename;
+            ui.displayTheField(enemyField, "right", true, options);
         }
 
         if (c == '\033') {

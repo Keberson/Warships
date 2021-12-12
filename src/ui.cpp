@@ -38,8 +38,6 @@ std::vector<std::string> OPTIONS_RAW = {"", "Options", "", "Width: ", "Height: "
 
 std::vector<std::string> OPTIONS_RATIOS_UI;
 
-// TODO(keberson): перенести это куда-то в другое место, это не относится к ui => его здесь не должно быть
-
 std::string FIRST_STRING_START_SYMBOL = "╔";
 std::string FIRST_STRING_END_SYMBOL = "╗";
 std::string LAST_STRING_START_SYMBOL = "╚";
@@ -48,7 +46,7 @@ std::string INACTIVE_SYMBOL = "║";
 std::string ACTIVE_SYMBOL_START = "╠";
 std::string ACTIVE_SYMBOL_END = "╣";
 
-class MenuString {          // TODO(keberson): подумать над строкой Action - действие при той или иной строке
+class MenuString {
 private:
     std::string _text;
     std::string _value;
@@ -170,6 +168,11 @@ std::vector<MenuString> SHIPS_SELECT;
 void resetInputMode() {
     tcsetattr(STDIN_FILENO, TCSANOW, &savedAttributes);
     std::cout << "\033[2J";
+}
+
+char ConsoleUI::getSymbol() {
+    tcflush(STDIN_FILENO, TCIFLUSH);
+    return getchar();
 }
 
 // ------------------------------------------------------------- Menu -------------------------------------------------
@@ -351,6 +354,8 @@ void ConsoleUI::displayTitles() {
 
         usleep(TITLES_DELAY);
     }
+
+
 }
 
 void ConsoleUI::setOptionsRatio(unsigned row, std::string ratio) {
@@ -426,6 +431,8 @@ void ConsoleUI::displayTheField(Field& field, std::string position, bool isHide,
     bool isHit= false;
     bool isDestroyed = false;
     bool isInvalidCell = false;
+    bool isSaveLoad = false;
+    bool isOpened = false;
     std::string cell = "";
 
     if (options.find("isPrepareState") != std::string::npos) {
@@ -446,6 +453,10 @@ void ConsoleUI::displayTheField(Field& field, std::string position, bool isHide,
         isDestroyed = true;
     } else if (options.find("isInvalidCell") != std::string::npos) {
         isInvalidCell = true;
+    } else if (options.find("isSaveLoad") != std::string::npos) {
+        isSaveLoad = true;
+    } else if (options.find("isOpened") != std::string::npos) {
+        isOpened = true;
     }
 
     auto name = options.find("cell:");
@@ -543,6 +554,10 @@ void ConsoleUI::displayTheField(Field& field, std::string position, bool isHide,
             std::cout << "\033[2K" << "\033[31m" << "Destroyed!" << "\033[37m" << std::endl;
         } else if (isInvalidCell) {
             std::cout << "\033[2K" << "\033[36m" << "Try again" << "\033[37m" << std::endl;;
+        } else if (isSaveLoad) {
+            std::cout << "\033[2K" << "\033[32m" << "Input filename: " << options.substr(options.find("isSaveLoad") + 11) << "\033[37m";
+        } else if (isOpened) {
+            std::cout << "\033[2K" << "\033[32m" << options.substr(options.find("isOpened") + 8) << "\033[37m";
         }
 
         std::cout << "\033[u" << "\033[K" << cell;
@@ -557,6 +572,13 @@ void ConsoleUI::displayTheField(Field& field, std::string position, bool isHide,
             std::cout << "\033[2K" << "\033[31m" << "Destroyed!" << "\033[37m" << std::endl;
         }
     }
+}
+
+void ConsoleUI::displayWinnerMessage(std::string winner) {
+    std::string winStr;
+    winStr += "Congratulations! " + winner + " is winner!";
+    setCursor(romax() / 2, comax() / 2 - winStr.length() / 2);
+    std::cout << winStr << std::endl;
 }
 
 

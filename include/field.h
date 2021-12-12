@@ -34,6 +34,7 @@ private:
 public:
     Field() { _numberOfHits = 0; };
     Field(unsigned width, unsigned height, std::vector<Ship> ships);
+    std::vector<Cell> getAllCells() { return _cells; };
     Cell& getCell(unsigned x, unsigned y) { return _cells.at(y * _width + x); };
     Ship* getShip(unsigned id);
     std::vector<Ship> getAllShips() { return _ships; };

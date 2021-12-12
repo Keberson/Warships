@@ -59,6 +59,7 @@ void saveToFile(std::string filename) {
                                     copyLine += " ";
                                 }
                             }
+
                             saveFile << copyLine;
                         }
                     }
@@ -72,7 +73,6 @@ void saveToFile(std::string filename) {
     }
 
     saveFile.close();
-    // TODO(keberosn): запись определенным образом, соответствующим парсеру
 }
 
 void emergencyInterruption(int p) {
@@ -128,7 +128,7 @@ short Game::prepareToGame() {
             isAllShipsPlaced = true;
         }
 
-        c = getchar();
+        c = _ui.getSymbol();
 
         if (c == 'q') {
             return SIGNAL_MENU;
@@ -230,7 +230,7 @@ short Game::prepareToGame() {
                     }
 
                     _ui.displayShipsSelect(field);
-                    c = getchar();
+                    c = _ui.getSymbol();
 
                     if (c == 'q') {
                         isSet = true;
@@ -492,7 +492,6 @@ short Game::startGame() {
     _ui.clearScreen();
 
     while (!isGameEnd) {
-        // For ConsoleUI
         _ui.displayFields(_players[0].getField(), _computer.getField());
 
         isCanTurn = true;
@@ -529,10 +528,7 @@ short Game::startGame() {
     }
 
     _ui.clearScreen();
-    std::string winStr;
-    winStr += "Congratulations! " + winner + " is winner!";
-    _ui.setCursor(_ui.romax() / 2, _ui.comax() / 2 - winStr.length() / 2);
-    std::cout << std::endl << winStr << std::endl;
+    _ui.displayWinnerMessage(winner);
     sleep(5);
     return SIGNAL_MENU;
 }
@@ -549,7 +545,7 @@ short Game::openMenu() {
         _ui.menuDoRowActive("menu", rowCounter);
         _ui.displayMenu();
 
-        c = getchar();
+        c = _ui.getSymbol();
 
         if (c == '\033') {
             isEscape = true;
@@ -618,7 +614,7 @@ short Game::openOptions() {
         _ui.menuDoRowActive("options", rowCounter);
         _ui.displayOptions();
 
-        c = getchar();
+        c = _ui.getSymbol();
 
         if (c == 'q') {
             isEnd = true;
@@ -668,7 +664,7 @@ short Game::openOptions() {
                 while (!isSet) {
                     _ui.displayOptions();
 
-                    c = getchar();
+                    c = _ui.getSymbol();
 
                     if (c == '\n') {
                         isSet = true;

@@ -11,10 +11,15 @@
 #define SIGNAL_TURN_HIT 1
 #define SIGNAL_GAME_EXIT 2
 
+#define ERROR_OPEN 0
+#define SUCCESS 1
+
 class User {
 private:
     std::string _name;
     Field _field;
+
+    std::vector<Cell> getCells() { return _field.getAllCells(); };
 public:
     User() {};
     User(std::string name, unsigned widthField, unsigned heightField, std::vector<Ship> ships);
@@ -23,6 +28,8 @@ public:
     bool attackEnemy(unsigned x, unsigned y, Field& enemyField);
     Field& getField() { return _field; };
     virtual short turn(Field& enemyField, ConsoleUI& ui) = 0;
+    short saveSession(std::string name, Field& enemyField);
+    short loadSession(std::string name, Field& enemyField);
     ~User() {};
 };
 
