@@ -1,8 +1,6 @@
 #include <csignal>
 #include <fstream>
 #include <iostream>
-#include <sys/ioctl.h>
-#include <termios.h>
 #include <unistd.h>
 
 #include "game.h"

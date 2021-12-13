@@ -1,8 +1,11 @@
 #ifndef WARSHIPS_UI_H
 #define WARSHIPS_UI_H
 
+#include <signal.h>
 #include <string>
 #include <sstream>
+#include <sys/ioctl.h>
+#include <unistd.h>
 
 #include "field.h"
 

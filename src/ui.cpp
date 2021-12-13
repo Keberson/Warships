@@ -316,21 +316,19 @@ void ConsoleUI::displayOptions() {
 }
 
 void ConsoleUI::displayTitles() {
-    unsigned rows = romax();
-    unsigned col = comax() / 2;
     std::vector<int> stringRow;
     for (auto item: TITLES) {
-        stringRow.push_back(rows);
+        stringRow.push_back(romax());
     }
 
     for (unsigned i = 0; i < TITLES.size(); ++i) {
         for (unsigned j = 0; j < i; ++j) {
-            setCursor(stringRow[0] + 1 + j, col - (TITLES[j].length() / 2));
+            setCursor(stringRow[0] + 1 + j, comax() / 2 - (TITLES[j].length() / 2));
             std::cout << "\033[2K";
         }
 
         for (unsigned j = 0; j < i + 1; ++j) {
-            setCursor(stringRow[j]--, col - (TITLES[j].length() / 2));
+            setCursor(stringRow[j]--, comax() / 2 - (TITLES[j].length() / 2));
             std::cout << TITLES[j] << std::flush;
         }
 
@@ -341,13 +339,13 @@ void ConsoleUI::displayTitles() {
         int i;
 
         for (i = 0; i < TITLES.size(); ++i) {
-            setCursor(stringRow[0] + 1 + i, col - (TITLES[i].length() / 2));
+            setCursor(stringRow[0] + 1 + i, comax() / 2 - (TITLES[i].length() / 2));
             std::cout << "\033[2K";
         }
 
         for (i = 0; i < TITLES.size(); ++i) {
             if (stringRow[i] != 0) {
-                setCursor(stringRow[i]--, col - (TITLES[i].length() / 2));
+                setCursor(stringRow[i]--, comax() / 2 - (TITLES[i].length() / 2));
                 std::cout << TITLES[i] << std::flush;
             }
         }
@@ -645,13 +643,13 @@ void ConsoleUI::turnOffCursor() {
 }
 
 unsigned ConsoleUI::comax() {
-    struct winsize w;
-    ioctl(0, TIOCGWINSZ, &w);
-    return(w.ws_col);
+    struct winsize ww;
+    ioctl(STDOUT_FILENO, TIOCGWINSZ, &ww);
+    return ww.ws_col;
 }
 
 unsigned ConsoleUI::romax() {
-    struct winsize w;
-    ioctl(0, TIOCGWINSZ, &w);
-    return(w.ws_row);
+    struct winsize ww;
+    ioctl(STDOUT_FILENO, TIOCGWINSZ, &ww);
+    return ww.ws_row;
 }
