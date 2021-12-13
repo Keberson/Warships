@@ -1,6 +1,8 @@
 #include <csignal>
 #include <fstream>
 #include <iostream>
+#include <sys/ioctl.h>
+#include <termios.h>
 #include <unistd.h>
 
 #include "game.h"
@@ -53,14 +55,17 @@ void saveToFile(std::string filename) {
                             copyLine = deleteSymbols(copyLine, "\r\n");
                             saveFile.seekg((unsigned)saveFile.tellg() - copyLine.length() - 2);
                             unsigned length = copyLine.length();
-                            copyLine.replace(copyLine.find(afterSymbol), afterSymbol.length(), OPTIONS_RATIOS[i]);
-                            if (length > copyLine.length()) {
-                                for (int j = 0; j < (length - copyLine.length()); ++j) {
-                                    copyLine += " ";
+                            auto copyLineFind = copyLine.find(afterSymbol);
+                            if (copyLineFind != std::string::npos) {
+                                copyLine.replace(copyLineFind, afterSymbol.length(), OPTIONS_RATIOS[i]);
+                                if (length > copyLine.length()) {
+                                    for (int j = 0; j < (length - copyLine.length()); ++j) {
+                                        copyLine += " ";
+                                    }
                                 }
-                            }
 
-                            saveFile << copyLine;
+                                saveFile << copyLine;
+                            }
                         }
                     }
 
@@ -319,7 +324,7 @@ short Game::prepareToGame() {
                                         border.push_back(&field.getCell(x[j], y[i]));
 
                                         continue;
-                                    } else if (i != y.size() - 1 && j != x.size() - 1 && j != y.size() - 2) {
+                                    } else if (i != y.size() - 1 && j != x.size() - 1 && j != x.size() - 2) {
                                         if (field.getCell(x[j], y[i]).getID() == ISLAND_ID) {
                                             isNotCorrectCells = true;
                                             break;
@@ -332,7 +337,7 @@ short Game::prepareToGame() {
                                         border.push_back(&field.getCell(x[j], y[i]));
 
                                         continue;
-                                    } else if (j != x.size() - 1 && i != y.size() - 1 && i != x.size() - 2) {
+                                    } else if (j != x.size() - 1 && i != y.size() - 1 && i != y.size() - 2) {
                                         if (field.getCell(x[j], y[i]).getID() == ISLAND_ID) {
                                             isNotCorrectCells = true;
                                             break;

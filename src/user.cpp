@@ -454,7 +454,7 @@ short Player::turn(Field& enemyField, ConsoleUI& ui) {
                         filename.pop_back();
                         options.pop_back();
                     }
-                } else {
+                } else if ((c >= '0' && c <= '9') || (tolower(c) >= 'a' && tolower(c) <= 'z') || c == '.' || c == '_') {
                     filename += c;
                     options += c;
                 }
@@ -507,7 +507,7 @@ short Player::turn(Field& enemyField, ConsoleUI& ui) {
             bool isInputEnd = false;
             std::string filename;
             while (!isInputEnd) {
-                c = getchar();
+                c = ui.getSymbol();
 
                 if (c == 27) {
                     isExit = true;

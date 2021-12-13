@@ -15,7 +15,7 @@
 #define SUCCESS 1
 
 class User {
-private:
+protected:
     std::string _name;
     Field _field;
 

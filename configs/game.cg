@@ -1,6 +1,5 @@
 rules:
-    width: 14
-    height: 7 
+    width: 15    height: 13  
     numberOfShips: 10
     typeOfShips: classic
     bonuses: inactive

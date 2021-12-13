@@ -31,7 +31,7 @@ std::vector<std::string> TITLES = { "The idea was invented by Kozov A.V.",
                                     "The code was written by Kuzov M.Y. and Mandzhiev D.Kh.",
                                     "The logic of the game was written by Kuzov M.Y.",
                                     "The interface was written by Mandzhiev D.Kh.",
-                                    "Pavlov P.S., Sham D.A. and Kolotilin V.S. helped in testing."};
+                                    "Pavlov P.S., Sham D.A., Kolotilin V.S., Sidorv A.V. and Krylov. A.S. helped in testing."};
 // Two last strings always are not interactive
 std::vector<std::string> MENU_RAW = {"", "Menu", "", "Start game", "Options", "Titles", "Exit", ""};
 std::vector<std::string> OPTIONS_RAW = {"", "Options", "", "Width: ", "Height: ", "Exit", ""};
@@ -371,6 +371,7 @@ void ConsoleUI::synchronizeOptionsRatio(std::vector<std::string>& ratios) {
 // ------------------------------------------------------------- Game -------------------------------------------------
 
 void ConsoleUI::prepareShipSelect(Field& field) {
+    SHIPS_SELECT.clear();
     std::vector<Ship> allShips = field.getAllShips();
     for (int i = 0; i < allShips.size(); ++i) {
         std::string tempStr;
@@ -545,7 +546,7 @@ void ConsoleUI::displayTheField(Field& field, std::string position, bool isHide,
             std::cout << "\033[2K" << "Now your turn..." << std::endl;
             std::cout << "Attack this cell: " << "\033[s" << " " << std::endl << std::endl;
             std::cout << "\033[32m" << "Use the arrows (← ↑ ↓ →) to move around the playing field, press "
-                      << "Enter when you select the desired cell" << "\033[37m";
+                      << "Enter when you select the desired cell, press S to save the session and L to load the session" << "\033[37m";
         } else if (isMiss) {
             std::cout << "\033[2K" << "\033[33m" << "Miss..." << "\033[37m" << std::endl;
         } else if (isHit) {

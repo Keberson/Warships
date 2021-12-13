@@ -15,7 +15,6 @@ private:
     unsigned _heightField;
     unsigned _numberOfShips;
     bool _isCustomShips;
-    unsigned _turnTime;
     bool _isActiveBonuses;
     unsigned _squareOfShips;
     std::vector<Bonus> _bonuses;
@@ -27,7 +26,6 @@ public:
     unsigned getWidthField() { return _widthField; };
     unsigned getHeightField() { return _heightField; };
     unsigned getNumberOfShips() { return _numberOfShips; };
-    unsigned getTurnTime() { return _turnTime; };
     bool getFlagBonuses() { return _isActiveBonuses; };
     unsigned getSquareOfShips() { return _squareOfShips; };
     Ship* getShip(unsigned id);

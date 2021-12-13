@@ -22,7 +22,7 @@ GameRules::GameRules(std::string filename) {
     for (unsigned i = 0; i < _numberOfShips; ++i, ++j) {
         if (_isCustomShips) {
 
-            // TODO(keberson): Задача для 2ой версии: заполнение кастомными кораблями и подсчёт площади кораблей
+            // TODO(keberson): заполнение кастомными кораблями и подсчёт площади кораблей
 
         } else {
             if (j >= STANDARD_SHIPS_NUMBER[shipSwitch]) {
@@ -53,7 +53,6 @@ GameRules::GameRules(std::string filename) {
     }
 
     tempVector = parser.getParserItem("rules", "turnTime");
-    _turnTime = (tempVector.empty() || std::stoi(tempVector[0]) <= 0) ? STANDARD_TURN_TIME : std::stoi(tempVector[0]);
     tempVector = parser.getParserItem("rules", "bonuses");
     _isActiveBonuses = (tempVector.empty() || tempVector[0] != "inactive" || tempVector[0] != "active") ?
                         STANDARD_BONUSES : (tempVector[0] == "active");
