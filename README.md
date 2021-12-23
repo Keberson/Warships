@@ -1,5 +1,7 @@
 # Warships
-Educational project Warships for the development and use of knowledge on the course of OOP students of the Bauman Moscow State Technical University of the RC6 department.
+Educational project Warships for the development and use of knowledge on the course of OOP students of the Bauman Moscow State Technical University of the CAD Systems Department. The project was divided into several components, which were subsequently divided among the developers of the project.The project consists of 2 modules, each of which is divided into several submodules:
++ The graphical component (Interface) and AI were assigned to the student Mandzhiev.
++ The parser and the logical component (parser, game logic) were assigned to the student Kuzov. 
 
 ## About the game "Sea Battle"
 
