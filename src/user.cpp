@@ -418,8 +418,8 @@ short Player::turn(Field& enemyField, ConsoleUI& ui) {
 
     std::string options = "player ";
     options += "cell:";
-    options += (char)(y + 'a');
-    options += std::to_string(x + 1) + ';';
+    options += (char)(x + 'a');
+    options += std::to_string(y + 1) + ';';
     options += "isFirstTurn;";
     ui.displayTheField(enemyField, "right", true, options);
 
@@ -435,8 +435,8 @@ short Player::turn(Field& enemyField, ConsoleUI& ui) {
             options.clear();
             options += "player";
             options += "cell:";
-            options += (char)(y + 'a');
-            options += std::to_string(x + 1) + ';';
+            options += (char)(x + 'a');
+            options += std::to_string(y + 1) + ';';
             options += "isSaveLoad:";
             ui.displayTheField(enemyField, "right", true, options);
             bool isInputEnd = false;
@@ -480,16 +480,16 @@ short Player::turn(Field& enemyField, ConsoleUI& ui) {
                 ui.displayFields(getField(), enemyField, options);
                 options = "player ";
                 options += "cell:";
-                options += (char)(y + 'a');
-                options += std::to_string(x + 1) + ';';
+                options += (char)(x + 'a');
+                options += std::to_string(y + 1) + ';';
                 options += "isOpened" + temp + filename;
                 ui.displayFields(getField(), enemyField, options);
             } else {
                 std::string options;
                 options = "player ";
                 options += "cell:";
-                options += (char)(y + 'a');
-                options += std::to_string(x + 1) + ';';
+                options += (char)(x + 'a');
+                options += std::to_string(y + 1) + ';';
                 options += "isFirstTurn;";
                 ui.displayTheField(enemyField, "right", true, options);
             }
@@ -500,8 +500,8 @@ short Player::turn(Field& enemyField, ConsoleUI& ui) {
             options.clear();
             options += "player";
             options += "cell:";
-            options += (char)(y + 'a');
-            options += std::to_string(x + 1) + ';';
+            options += (char)(x + 'a');
+            options += std::to_string(y + 1) + ';';
             options += "isSaveLoad:";
             ui.displayTheField(enemyField, "right", true, options);
             bool isInputEnd = false;
@@ -548,16 +548,16 @@ short Player::turn(Field& enemyField, ConsoleUI& ui) {
                 ui.displayFields(getField(), enemyField, options);
                 options = "player ";
                 options += "cell:";
-                options += (char)(y + 'a');
-                options += std::to_string(x + 1) + ';';
+                options += (char)(x + 'a');
+                options += std::to_string(y + 1) + ';';
                 options += "isOpened" + temp + filename;
                 ui.displayFields(getField(), enemyField, options);
             } else {
                 std::string options;
                 options = "player ";
                 options += "cell:";
-                options += (char)(y + 'a');
-                options += std::to_string(x + 1) + ';';
+                options += (char)(x + 'a');
+                options += std::to_string(y + 1) + ';';
                 options += "isFirstTurn;";
                 ui.displayTheField(enemyField, "right", true, options);
             }
@@ -613,8 +613,8 @@ short Player::turn(Field& enemyField, ConsoleUI& ui) {
             enemyField.setID(x, y,2);
             options = "player ";
             options += "cell:";
-            options += (char)(y + 'a');
-            options += std::to_string(x + 1) + ';';
+            options += (char)(x + 'a');
+            options += std::to_string(y + 1) + ';';
             ui.displayTheField(enemyField, "right", true, options);
         }
 
@@ -632,7 +632,7 @@ short Player::turn(Field& enemyField, ConsoleUI& ui) {
                 enemyField.getCell(x, y).setID(cellID);
             } else {
                 options = "player ";
-                options += "cell:" + (char)(y + 'a') + std::to_string(x + 1) + ';';
+                options += "cell:" + (char)(x + 'a') + std::to_string(y + 1) + ';';
                 options += "isInvalidCell;";
                 ui.displayTheField(enemyField, "right", true, options);
             }
@@ -648,8 +648,8 @@ short Player::turn(Field& enemyField, ConsoleUI& ui) {
         if (enemyField.getShip(prevCellID)->getHP() > 0) {
             options = "player ";
             options += "cell:";
-            options += (char)(y + 'a');
-            options += std::to_string(x + 1) + ';';
+            options += (char)(x + 'a');
+            options += std::to_string(y + 1) + ';';
             options += "isHit;";
             ui.displayTheField(enemyField, "right", true, options);
         } else {
@@ -665,8 +665,8 @@ short Player::turn(Field& enemyField, ConsoleUI& ui) {
 
             options = "player ";
             options += "cell:";
-            options += (char)(y + 'a');
-            options += std::to_string(x + 1) + ';';
+            options += (char)(x + 'a');
+            options += std::to_string(y + 1) + ';';
             options += "isDestroyed;";
             ui.displayTheField(enemyField, "right", true, options);
         }
@@ -677,8 +677,8 @@ short Player::turn(Field& enemyField, ConsoleUI& ui) {
         prevY = y;
         options = "player ";
         options += "cell:";
-        options += (char)(y + 'a');
-        options += std::to_string(x + 1) + ';';
+        options += (char)(x + 'a');
+        options += std::to_string(y + 1) + ';';
         options += "isMiss;";
         ui.displayTheField(enemyField, "right", true, options);
         return SIGNAL_TURN_MISS;
