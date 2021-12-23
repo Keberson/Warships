@@ -8,9 +8,9 @@ The winner is the one who first destroys all the cells.
 
 During the game, the user can save or load the session, as well as go to the menu. You can read about the menu here -> [Menu](menu.md)
 
-![](https://github.com/Keberson/Warships/blob/project/docs/preapare.gif)
+<img src='https://github.com/Keberson/Warships/blob/project/docs/preapare.gif?raw=true'/>
 
-![](https://github.com/Keberson/Warships/blob/project/docs/game.gif)
+<img src='https://github.com/Keberson/Warships/blob/project/docs/game.gif?raw=true'/>
 
 |    Key  |                      Appointment                         |
 | ------- | -------------------------------------------------------- |
