@@ -25,3 +25,5 @@ In this section you can see a list of all those involved in the development to o
 
 ### Section *Exit*
 Well... this is the exit
+
+![](https://github.com/Keberson/Warships/blob/project/docs/menu.gif)
