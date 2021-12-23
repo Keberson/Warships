@@ -19,4 +19,4 @@ During the game, the user can save or load the session, as well as go to the men
 |   `P`   | Arrange the remaining ships randomly (preparation phase) |
 |   `S`   |                  Save the session                        |
 |   `L`   |                  Load the session                        |
-|   `Q`   |                   Go to the menu                         |
+|   `Q`   |           Go to the menu / Cancel selection              |
