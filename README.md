@@ -26,5 +26,5 @@ Sea Battle is a game in which players take turns choosing coordinates on an unkn
 + `src` - .cpp files
 
 
-## Questions? Comments? Suggestions?
+#### Questions? Comments? Suggestions?
 We are ready to explore any additions)
