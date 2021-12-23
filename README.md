@@ -22,8 +22,8 @@ The following must be installed on the device:
 
 ## Instructions for working with the project
 + [Menu](docs/menu.md)
-+ [Game](https://github.com/Keberson/Warships/blob/project/docs/game.md)
-+ [Build and launch](https://github.com/Keberson/Warships/blob/project/docs/launch.md)
++ [Game](docs/game.md)
++ [Build and launch](docs/launch.md)
 
 ## Assigning project directories:
 + `docs` - documentation files
