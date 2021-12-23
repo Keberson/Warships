@@ -13,7 +13,7 @@ During the game, the user can save or load the session, as well as go to the men
 ![](https://github.com/Keberson/Warships/blob/project/docs/game.gif)
 
 |    Key  |                      Appointment                         |
-| ------- |:--------------------------------------------------------:|
+| ------- | -------------------------------------------------------- |
 |   `↑`   |                       Move up                            |
 |   `↓`   |                      Move down                           |
 |   `→`   |                      Move right                          |
