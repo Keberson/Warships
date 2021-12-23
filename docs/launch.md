@@ -14,3 +14,5 @@ Hooray, the program is ready to launch!
 ```` 
 ./warships 
 ````
+
+<img src='https://github.com/Keberson/Warships/blob/project/docs/launch.gif?raw=true' />
