@@ -12,6 +12,12 @@ Sea Battle is a game in which players take turns choosing coordinates on an unkn
 + The ships are located by the user independently, but he can resort to a random arrangement of the remaining ships.
 + The game allows you to save and load sessions during the game.
 
+## Requirements:
+The following must be installed on the device:
++ C++14
++ Cmake 3.16
++ Make
+
 (Здесь буит гифа)
 
 ## Instructions for working with the project
