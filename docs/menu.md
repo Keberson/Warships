@@ -8,6 +8,7 @@ The program greets the user with the main menu to select further user actions:
 
 The following keys are used to select a section:
   |   Key   |              Appointment                |
+  | ------  |:---------------------------------------:| 
   |   `↑`   |        Move up / increase size          |
   |   `↓`   |     Move down / decrease the size       |
   | `Enter` | Selecting a menu item / Setting a value |
