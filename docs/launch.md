@@ -2,7 +2,7 @@
 
 There are several ways to download the program sources:
 + ```` git clone https://github.com/Keberson/Warships.git ````
-+ [Download](https://github.com/Keberson/Warships/archive/refs/heads/project .zip)
++ [Download](https://github.com/Keberson/Warships/archive/refs/heads/project.zip)
 
 After downloading and unpacking, you need to perform the following actions`
 ```` 
