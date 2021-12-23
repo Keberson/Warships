@@ -14,7 +14,7 @@ The following keys are used to select a section:
   | `Enter` | Selecting a menu item / Setting a value |
 
 ### Section *Start of the game*
-This section is responsible for all subsequent gameplay. You can read more about it here -> [Game](docs/game.md)
+This section is responsible for all subsequent gameplay. You can read more about it here -> [Game](game.md)
 
 ### Section *Rule Settings*
 This section is responsible for setting up custom rules. At the moment, setting the width and height of the field is supported.
