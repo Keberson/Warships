@@ -18,6 +18,8 @@ This section is responsible for all subsequent gameplay. You can read more about
 ### Section *Rule Settings*
 This section is responsible for setting up custom rules. At the moment, setting the width and height of the field is supported.
 
+The game also has a configuration file in which you can configure the rules in advance, and they will appear in this section. File *game.cg * it is contained in the *configs* folder. The package also includes a file *game_reserve.cg * , which can also be used.
+
 ### Section *Titles*
 In this section you can see a list of all those involved in the development to one degree or another
 
