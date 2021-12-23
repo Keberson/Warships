@@ -20,7 +20,7 @@ Sea Battle is a game in which players take turns choosing coordinates on an unkn
 + [Build and launch](docs/menu.md)
 
 ## Assigning project directories:
-`docs` - documentation files
-`configs`- configuration files
-`include` - header files
-`src` - .cpp files
++ `docs` - documentation files
++ `configs`- configuration files
++ `include` - header files
++ `src` - .cpp files
