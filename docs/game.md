@@ -6,7 +6,7 @@ After the ships are arranged, the game phase begins. The user and the computer t
 
 The winner is the one who first destroys all the cells. 
 
-During the game, the user can save or load the session, as well as go to the menu. You can read about the menu here -> [Menu](https://raw.githubusercontent.com/Keberson/Warships/project/docs/menu.md)
+During the game, the user can save or load the session, as well as go to the menu. You can read about the menu here -> [Menu](menu.md)
 
 ![](https://github.com/Keberson/Warships/blob/project/docs/preapare.gif)
 
