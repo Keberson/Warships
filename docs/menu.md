@@ -6,6 +6,7 @@ The program greets the user with the main menu to select further user actions:
 + Exit the program
 
 The following keys are used to select a section:
+
 |   Key   |               Appointment               |
 | ------- | --------------------------------------- |
 |   `↑`   |        Move up   / increase size        |
