@@ -1,4 +1,3 @@
-menu.md
 # Menu
 The program greets the user with the main menu to select further user actions:
 + Start of the game
