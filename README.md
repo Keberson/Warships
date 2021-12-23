@@ -18,8 +18,6 @@ The following must be installed on the device:
 + Cmake 3.16
 + Make
 
-(Здесь буит гифа)
-
 ## Instructions for working with the project
 + [Menu](docs/menu.md)
 + [Game](docs/game.md)
