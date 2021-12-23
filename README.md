@@ -15,9 +15,9 @@ Sea Battle is a game in which players take turns choosing coordinates on an unkn
 (Здесь буит гифа)
 
 ## Instructions for working with the project
-+ [Menu](docs/menu.md)
-+ [Game](docs/game.md)
-+ [Build and launch](docs/launch.md)
++ [Menu](https://github.com/Keberson/Warships/blob/project/docs/menu.md)
++ [Game](https://github.com/Keberson/Warships/blob/project/docs/game.md)
++ [Build and launch](https://github.com/Keberson/Warships/blob/project/docs/launch.md)
 
 ## Assigning project directories:
 + `docs` - documentation files
