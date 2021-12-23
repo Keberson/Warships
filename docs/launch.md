@@ -6,6 +6,7 @@ There are several ways to download the program sources:
 
 After downloading and unpacking, you need to perform the following actions`
 ```` 
+cd Warships
 cmake .
 make 
 ````
