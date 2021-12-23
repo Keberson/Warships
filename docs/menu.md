@@ -5,14 +5,12 @@ The program greets the user with the main menu to select further user actions:
 + Rule Settings
 + Titles
 + Exit the program
-  The following keys are used to select a section:
-  | Key | Appointment |
-  | --------------- | ----------------------------------- |
-  | ↑ | Move up / increase size |
-  | --------------- | ----------------------------------- |
-  | ↓ | Move down / decrease the size |
-  | --------------- | ----------------------------------- |
-  | Enter | Selecting a menu item / Setting a value |
+
+The following keys are used to select a section:
+  |   Key   |              Appointment                |
+  |   `↑`   |        Move up / increase size          |
+  |   `↓`   |     Move down / decrease the size       |
+  | `Enter` | Selecting a menu item / Setting a value |
 
 ### Section *Start of the game*
 This section is responsible for all subsequent gameplay. You can read more about it here -> [Game](docs/game.md)
