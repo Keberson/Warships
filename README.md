@@ -3,6 +3,8 @@ Educational project Warships for the development and use of knowledge on the cou
 + The graphical component (Interface) and AI were assigned to the student Mandzhiev.
 + The parser and the logical component (parser, game logic) were assigned to the student Kuzov. 
 
+<img src='https://github.com/Keberson/Warships/blob/project/docs/main.gif?raw=true'/>
+
 ## About the game "Sea Battle"
 
 Sea Battle is a game in which players take turns choosing coordinates on an unknown opponent's map. If the opponent has a ship at these coordinates (the coordinates are occupied), then the ship or part of it is "drowned", and the hit gets the right to make another move. The player's goal is to sink all enemy ships first.
